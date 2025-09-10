@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- __init__.py files in core/ and tests/ because tests were not detecting the imported modules
+
+### Changed
+
+- Details in test/ modules in order to fulfill QA requirements up to now
+
+## [0.0.12] - 09/08/25
+
+### Added
+
 - ./github/workflows/ci.yml for continuous integration
 
 ### Changed
