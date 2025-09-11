@@ -16,6 +16,8 @@ Este proyecto final de la materia Computación I se basa en la creación de un s
 # Referencias a requisitos SOLID y cómo se cumplen
 # Anexos: diagramas UML
 
+---
+
 # Summary of the general design
 # Justification of the chosen classes
 # Justification of attributes
