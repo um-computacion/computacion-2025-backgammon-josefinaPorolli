@@ -3,9 +3,9 @@
 class Checker:
     """Class for each checker of the game"""
     # CONSTRUCTOR - sets the attributes of the object
-    def __init__(self, colour: str):
+    def __init__(self, checker_id: int, colour: str):
         """Constructor: initializes the checker with an id and a colour"""
-        self.__id__ = id(self) # Unique identifier for each checker depending on its memory address
+        self.__id__ = checker_id # Unique identifier for the checker
         self.__colour__ = colour # Colour of the checker
 
     # Getters
@@ -20,10 +20,3 @@ class Checker:
     def get_colour(self) -> str:
         """Getter for the checker colour"""
         return self.__colour__
-
-    # Setter
-    # This method receives a parameter colour to assign a colour to every checker.
-    # It does not return any value.
-    def set_colour(self, colour: str) -> None:
-        """Setter for the checker colour"""
-        self.__colour__ = colour
