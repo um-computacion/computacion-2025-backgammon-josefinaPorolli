@@ -5,11 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.16] - 11/09/25
+
+### Changed
+
+- Unique id for each element of type Checker
+
+### Removed
+- Setter for the colour of the checker, as it is already set when each instance is declared
+- Test for colour setter in class Checker
+
 ## [0.0.15] - 11/09/25
 
 ### Added
 
 - Test module for class checker
+- Prompt in promptsAI/prompts-testing.md
 
 ### Changed
 
