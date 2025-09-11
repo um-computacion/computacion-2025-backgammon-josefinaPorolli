@@ -5,13 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.13] - 10/08/25
+## [0.0.15] - 11/09/25
+
+### Added
+
+- Test module for class checker
+
+### Changed
+
+- Changed wrong dates in CHANGELOG.md file (accidentally put August when actually some commits were done in September)
+
+## [0.0.14] - 11/09/25
+
+### Added
+
+- Module for class Checker
+
+## [0.0.13] - 10/09/25
 
 ### Added
 
 - README file with basic structure
 
-## [0.0.12] - 09/08/25
+## [0.0.12] - 09/09/25
 
 ### Added
 
@@ -21,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Details in test/ modules in order to fulfill QA requirements up to now
 
-## [0.0.12] - 09/08/25
+## [0.0.12] - 09/09/25
 
 ### Added
 
@@ -30,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Modules in core/ in order to correct errors marked by pylint
 
-## [0.0.11] - 09/08/25
+## [0.0.11] - 09/09/25
 
 ### Added
 
