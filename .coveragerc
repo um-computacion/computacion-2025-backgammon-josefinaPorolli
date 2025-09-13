@@ -2,8 +2,10 @@
 omit =
     */venv/*
     */tests/*
+    core/__init__.py
 
 [report]
 omit =
     */venv/*
     */tests/*
+    core/__init__.py
