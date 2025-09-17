@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.17] - 17/09/25
 
+### Changed
+
+- Class board: changed the idea of the class, as the fields in the board have to keep instances of class Checker, not quantity of checkers and their colour.
+
+## [0.0.17] - 17/09/25
+
 ### Added
 
 - Module for class board
