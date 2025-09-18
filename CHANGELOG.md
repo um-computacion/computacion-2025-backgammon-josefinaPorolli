@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.17] - 17/09/25
+## [0.0.19] - 17/09/25
+
+### Added
+
+- Module for class backgammon game, implementing the methods for turns and checking basic moves so that the checkers don't go off the main board.
+
+## [0.0.18] - 17/09/25
 
 ### Changed
 
