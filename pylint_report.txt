@@ -1,0 +1,11 @@
+************* Module core.board
+core\board.py:8:0: C0301: Line too long (132/100) (line-too-long)
+core\board.py:11:0: C0301: Line too long (108/100) (line-too-long)
+core\board.py:44:0: C0303: Trailing whitespace (trailing-whitespace)
+core\board.py:3:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+************* Module tests.test_checker
+tests\test_checker.py:6:0: C0115: Missing class docstring (missing-class-docstring)
+
+-----------------------------------
+Your code has been rated at 9.35/10
+
