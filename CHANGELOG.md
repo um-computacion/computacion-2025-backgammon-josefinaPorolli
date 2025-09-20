@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.21] - 20/09/25
+
+### Added
+
+- Class Backgammon Game: added methods for moving checkers.
+- Class Backgammon Game: added a method for checking if the player can take out an eaten checker.
+- Class Backgammon Game: added a method for getting the destination. Useful for checking if the checker can be moved to the house.
+- Class Backgammon Game: added a method for moving the checker to the house.
+- Class Board: added two methods: one for adding a checker to a field (also useful for the beginning of the game with the default positions), and another for removing a field from an origin (for moving checkers).
+
+### Changed
+
+- Changed the way the method eat_opponent_checker works with new methods in class Board.
+- Changed the logic of check_move in Backgammon Game, as the first thing the game needs to do is to check if the player must take out eaten checkers.
+
 ## [0.0.20] - 19/09/25
 
 ### Changed
