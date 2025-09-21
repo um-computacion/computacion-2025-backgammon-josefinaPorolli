@@ -128,28 +128,19 @@ class BackgammonGame:
                 return True
             return False
     
-
-
-    # This method receives the point where the chosen checker is and the steps it has to move as parameters.
-    # It returns True if the move is valid or not. Just checks basic moves, like not going off the board.
-    # Returns False if the move is not valid. Returns True if the move is valid.
-    def check_move(self, point:str, steps:int) -> bool:
-        """This method evaluates if the move that is going to be made is valid"""
+    # This method receives the origin and the steps as parameters.
+    # It checks if a checker can be moved to the house.
+    # It returns True if the move is valid. It returns False if:
+    # 1. Not all checkers are in the player's square
+    # 2. The steps don't match the origin point with the steps to the house
+    # AND there are checkers further than the number the steps allow.
+    def check_move_to_house(self, origin:str, steps:int) -> bool:
         if self.get_turn() == "Black":
 
             # The moves will increment from 1 to 24
-            destination = self.get_destination_point(point, steps)
+            destination = self.get_destination_point(origin, steps)
 
-            # First check if there are eaten checkers. If there are, the player must take them out before moving any other checker.
-            # First check if there are eaten checkers.
-            if self.check_eaten_checkers("Black"):
-                # If there are, check if it is possible to take one out with the given steps.
-                if self.check_take_out_eaten_checker("Black"):
-                    return True
-                return False
-
-            elif destination > 24: # If the checker tries to go off the board
-
+            if destination > 24: # If the checker tries to go off the board
                 # Check if all the checkers are in the player's square.
                 # If they are not, the move is not valid. If they are, we proceed with the next conditionals.
                 # a. Check that there are no black checkers in points 1 to 18
@@ -177,30 +168,13 @@ class BackgammonGame:
                                                         return True
                                                 else:
                                                     return True
-            
-            # Check of there is any opponent checker in the destination point
-            elif self.check_opponent_checkers(destination):
-                # If there are, we check if it is eatable (only 1 opponent checker)
-                if self.check_eatable_checker(destination):
-                    # If there is, the move is valid and the checker can be eaten.
-                    return True
-                return False
-            return True
-            
+         
         elif self.get_turn() == "White":
 
             # The moves will decrement from 24 to 1
-            destination = self.get_destination_point(point, steps)
+            destination = self.get_destination_point(origin, steps)
 
-            # First check if there are eaten checkers. If there are, the player must take them out before moving any other checker.
-            # First check if there are eaten checkers.
-            if self.check_eaten_checkers("Black"):
-                # If there are, check if it is possible to take one out with the given steps.
-                if self.check_take_out_eaten_checker("Black"):
-                    return True
-                return False
-
-            elif destination < 1:
+            if destination < 1:
                 # Check if all the checkers are in the player's square.
                 # If they are not, the move is not valid. If they are, we proceed with the next conditionals.
                 # a. Check that there are no white checkers in points 1 to 18
@@ -230,6 +204,57 @@ class BackgammonGame:
                                                         return True
                                                 else:
                                                     return True
+
+
+    # This method receives the point where the chosen checker is and the steps it has to move as parameters.
+    # It returns True if the move is valid or not. Just checks basic moves, like not going off the board.
+    # Returns False if the move is not valid. Returns True if the move is valid.
+    def check_move(self, point:str, steps:int) -> bool:
+        """This method evaluates if the move that is going to be made is valid"""
+        if self.get_turn() == "Black":
+
+            # The moves will increment from 1 to 24
+            destination = self.get_destination_point(point, steps)
+
+            # First check if there are eaten checkers. If there are, the player must take them out before moving any other checker.
+            # First check if there are eaten checkers.
+            if self.check_eaten_checkers("Black"):
+                # If there are, check if it is possible to take one out with the given steps.
+                if self.check_take_out_eaten_checker("Black"):
+                    return True
+                return False
+
+            elif destination > 24: # If the checker tries to go off the board
+                if self.check_move_to_house(): # Check if it can enter the house.
+                    return True
+                return False
+            
+            # Check of there is any opponent checker in the destination point
+            elif self.check_opponent_checkers(destination):
+                # If there are, we check if it is eatable (only 1 opponent checker)
+                if self.check_eatable_checker(destination):
+                    # If there is, the move is valid and the checker can be eaten.
+                    return True
+                return False
+            return True
+            
+        elif self.get_turn() == "White":
+
+            # The moves will decrement from 24 to 1
+            destination = self.get_destination_point(point, steps)
+
+            # First check if there are eaten checkers. If there are, the player must take them out before moving any other checker.
+            # First check if there are eaten checkers.
+            if self.check_eaten_checkers("Black"):
+                # If there are, check if it is possible to take one out with the given steps.
+                if self.check_take_out_eaten_checker("Black"):
+                    return True
+                return False
+
+            elif destination < 1: # If the checker tries to go off the board
+                if self.check_move_to_house(): # Check if it can enter the house.
+                    return True
+                return False
             
             # Check of there is any opponent checker in the destination point
             elif self.check_opponent_checkers(destination):
@@ -277,9 +302,11 @@ class BackgammonGame:
     # It moves a checker from the origin to the player's house.
     # It does not return any values.
     def move_checker_to_house(self, origin:int):
-        # Under the condition that the checker can be moved to the house, the origin is supposed to be an int.
+        # First check if the checker can be moved to the house. If it can, move it.
         if self.get_turn() == "Black":
-            self.move_checker(origin, "BHouse")
+            if self.check_move_to_house():
+                self.move_checker(origin, "BHouse")
         elif self.get_turn() == "White":
-            self.move_checker(origin, "WHouse")
+            if self.check_move_to_house():
+                self.move_checker(origin, "WHouse")
         
