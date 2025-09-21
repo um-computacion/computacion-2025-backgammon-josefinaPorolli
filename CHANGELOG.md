@@ -1,0 +1,184 @@
+# BACKGAMMON - CHANGELOG
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 20/09/25
+
+### Added
+
+- Class Backgammon Game: added method for checking winner. The class now should have all the methods I need. This will be checked with tests and implementation.
+
+## [0.0.22] - 20/09/25
+
+### Added
+
+- Class Backgammon Game: added method for checking if the chosen checker can be moved to the house.
+
+### Changed
+
+- Class Backgammon Game: replaced the block in check_move that checked if the checker could be moved to the house for the new method
+- Class Backgammon Game: before moving the checker in move_checker_to_house(), the method checks if the move is valid with the new method.
+
+## [0.0.21] - 20/09/25
+
+### Added
+
+- Class Backgammon Game: added methods for moving checkers.
+- Class Backgammon Game: added a method for checking if the player can take out an eaten checker.
+- Class Backgammon Game: added a method for getting the destination. Useful for checking if the checker can be moved to the house.
+- Class Backgammon Game: added a method for moving the checker to the house.
+- Class Board: added two methods: one for adding a checker to a field (also useful for the beginning of the game with the default positions), and another for removing a field from an origin (for moving checkers).
+
+### Changed
+
+- Changed the way the method eat_opponent_checker works with new methods in class Board.
+- Changed the logic of check_move in Backgammon Game, as the first thing the game needs to do is to check if the player must take out eaten checkers.
+
+## [0.0.20] - 19/09/25
+
+### Changed
+
+- Class Backgammon Game: added methods for checking valid moves. Fixed general check method implementing all necessary kinds of checks. Also added method for eating the opponent´s checker.
+
+## [0.0.19] - 17/09/25
+
+### Added
+
+- Module for class backgammon game, implementing the methods for turns and checking basic moves so that the checkers don't go off the main board.
+
+## [0.0.18] - 17/09/25
+
+### Changed
+
+- Class board: changed the idea of the class, as the fields in the board have to keep instances of class Checker, not quantity of checkers and their colour.
+
+## [0.0.17] - 17/09/25
+
+### Added
+
+- Module for class board
+
+## [0.0.16] - 11/09/25
+
+### Changed
+
+- Unique id for each element of type Checker
+
+### Removed
+- Setter for the colour of the checker, as it is already set when each instance is declared
+- Test for colour setter in class Checker
+
+## [0.0.15] - 11/09/25
+
+### Added
+
+- Test module for class checker
+- Prompt in promptsAI/prompts-testing.md
+
+### Changed
+
+- Changed wrong dates in CHANGELOG.md file (accidentally put August when actually some commits were done in September)
+
+## [0.0.14] - 11/09/25
+
+### Added
+
+- Module for class Checker
+
+## [0.0.13] - 10/09/25
+
+### Added
+
+- README file with basic structure
+
+## [0.0.12] - 09/09/25
+
+### Added
+
+- __init__.py files in core/ and tests/ because tests were not detecting the imported modules
+
+### Changed
+
+- Details in test/ modules in order to fulfill QA requirements up to now
+
+## [0.0.12] - 09/09/25
+
+### Added
+
+- ./github/workflows/ci.yml for continuous integration
+
+### Changed
+- Modules in core/ in order to correct errors marked by pylint
+
+## [0.0.11] - 09/09/25
+
+### Added
+
+- pylint in requirements.txt
+- .pylintrc file
+
+## [0.0.10] - 29/08/25
+
+### Added
+
+- Tests for Dice.
+- XML and HTML reports with coverage
+
+## [0.0.9] - 29/08/25
+
+### Added
+
+- Class Dice with attributes and methods
+
+## [0.0.8] - 28/08/25
+
+### Added
+
+- File for class Dice (empty file)
+
+## [0.0.7] - 28/08/25
+
+### Added
+
+- .coveragerc file to omit venv and tests folders
+- coverage xml with Player class testing
+- coverage html with Player class testing
+
+## [0.0.6] - 28/08/25
+
+### Added
+
+- Tests for class Player
+
+## [0.0.5] - 27/08/25
+
+### Added
+
+- Files that clarify every interaction with artificial intelligence for this project
+
+## [0.0.4] - 27/08/25
+
+### Added
+
+- venv and gitignore files
+
+## [0.0.3] - 27/08/25
+
+### Added
+
+- Requirements file for coverage installation
+
+## [0.0.2] - 26/08/25
+
+### Added
+
+- CHANGELOG file
+
+## [0.0.1] - 25/08/25
+
+### Added
+
+- Class Player with attributes name and colour to identify each player itself in human language, and the colour of the checkers they are playing with
