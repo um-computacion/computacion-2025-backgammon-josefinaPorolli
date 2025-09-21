@@ -168,42 +168,61 @@ class BackgammonGame:
     # It is a sub method of check_move_to_house for black checkers.
     # It returns True if the checker can enter the house. It returns False if it can´t.
     def _check_black_move_to_house(self, origin: str, steps: int) -> bool:
-        """Helper method for black's move to house."""
+        """Helper method for check_move_to_house in Black case."""
         destination = self.get_destination_point(int(origin), steps)
 
         if destination <= 24:
-            return False  # Not a move to black house
+            return False  # Not a move to the black house
 
-        # Check if there are checkers out of the square
+        # Check checkers out of the player's square or eaten checkers
+        if self._black_checkers_out_of_square():
+            return False
+
+        # Check valid moves to take out checkers
+        return self._is_valid_black_bear_off(steps)
+
+    ############## SUB METHODS FOR CHECKING BLACK MOVE TO THE HOUSE ###################
+    # This method does not receive any parameters.
+    # It returns True if there are checkers out of the player's square and False if there aren't.
+    def _black_checkers_out_of_square(self) -> bool:
+        """Check if black has checkers outside home board or eaten."""
+        # Check if there are checkers out of the player's square.
         for i in range(1, 19):
             for checker in self.__board__.get_checkers_in_field(str(i)):
                 if checker.get_colour() == "Black":
-                    return False
-
-        # Check if there are eaten checkers
-        if self.check_eaten_checkers("Black"):
-            return False
-
-        # Check valid movements to take out checkers
-        point_to_check = 25 - steps # Checks the point
-        checkers_at_point = self.__board__.get_checkers_in_field(str(point_to_check))
-
-        # If there are checkers in the point, the move is valid.
-        for checker in checkers_at_point:
-            if checker.get_colour() == "Black":
-                return True
-
-        # If there are not, we check further points
-        for i_point in range(19, point_to_check + 1):
-            checkers_at_i = self.__board__.get_checkers_in_field(str(i_point))
-            for checker in checkers_at_i:
-                if checker.get_colour() == "Black":
-                    # If there are checkers in further points, the move is not valid.
-                    if i_point < point_to_check:
-                        return False
                     return True
 
-        return False  # Default case
+        # Check eaten checkers
+        return self.check_eaten_checkers("Black")
+
+    # This method receives steps as a parameter.
+    # It returns True if the Black player can move checkers to the house and false if he/she can't.
+    def _is_valid_black_bear_off(self, steps: int) -> bool:
+        """Check if black can legally move to the house with the given steps."""
+        point_to_check = 25 - steps
+
+        # Check checkers in the exact point
+        if self._black_checker_at_point(point_to_check):
+            return True
+
+        # Check further points
+        for i_point in range(19, point_to_check + 1): # From pint 19 to the evaluated point
+            if self._black_checker_at_point(i_point):
+                # Returns True (valid move) if the checker is in the exact point or nearer
+                return i_point >= point_to_check
+
+        return False
+
+    # This method receives an evaluated point.
+    # Returns True if there are checkers in the exact point and False if there aren't.
+    def _black_checker_at_point(self, point: int) -> bool:
+        """Check if there's a black checker at given point."""
+        for checker in self.__board__.get_checkers_in_field(str(point)):
+            if checker.get_colour() == "Black":
+                return True
+        return False
+
+    ######################################################################################
 
     # This method receives the origin point and the steps as parameters.
     # It is a sub method of check_move_to_house for white checkers.
@@ -213,38 +232,57 @@ class BackgammonGame:
         destination = self.get_destination_point(int(origin), steps)
 
         if destination >= 1:
-            return False  # Not a move to the white house
+            return False  # Not a move to house
 
-        # Check if there are no checkers out of the player's square
+        # Check if there are checkers out of the player's square or eaten checkers
+        if self._white_checkers_out_of_square():
+            return False
+
+        # Check valid moves to take out checkers
+        return self._is_valid_white_bear_off(steps)
+
+    ############## SUB METHODS FOR CHECKING WHITE MOVE TO THE HOUSE ###################
+    # This method does not receive any parameters.
+    # It returns True if there are checkers out of the player's square and False if there aren't.
+    def _white_checkers_out_of_square(self) -> bool:
+        """Check if white has checkers outside home board or eaten."""
+        # Check checkers out of the square
         for i in range(7, 25):
             for checker in self.__board__.get_checkers_in_field(str(i)):
                 if checker.get_colour() == "White":
-                    return False
-
-        # Check if there are eaten checkers.
-        if self.check_eaten_checkers("White"):
-            return False
-
-        # Check valid movements to take out checkers
-        point_to_check = steps
-        checkers_at_point = self.__board__.get_checkers_in_field(str(point_to_check))
-
-        # If there are checkers in the exact point, the move is valid.
-        for checker in checkers_at_point:
-            if checker.get_colour() == "White":
-                return True
-
-        # Check further points in case there are no checkers in the exact point.
-        for i_point in range(6, point_to_check - 1, -1):
-            checkers_at_i = self.__board__.get_checkers_in_field(str(i_point))
-            for checker in checkers_at_i:
-                if checker.get_colour() == "White":
-                    # If there are checkers in further points, it is not valid.
-                    if i_point > point_to_check:
-                        return False
                     return True
 
-        return False  # Default case.
+        # Check eaten checkers
+        return self.check_eaten_checkers("White")
+
+    # This method receives steps as a parameter.
+    # It returns True if the Black player can move checkers to the house and false if he/she can't.
+    def _is_valid_white_bear_off(self, steps: int) -> bool:
+        """Check if white can legally bear off with given steps."""
+        point_to_check = steps
+
+        # Check if there are checkers in the exact point
+        if self._white_checker_at_point(point_to_check):
+            return True
+
+        # If there aren't checkers in the point, check further points in the same square.
+        for i_point in range(6, point_to_check - 1, -1):
+            if self._white_checker_at_point(i_point):
+                # Returns True if the checker is in the exact point or nearer
+                return i_point <= point_to_check
+
+        return False
+
+    # This method receives an evaluated point.
+    # Returns True if there are checkers in the exact point and False if there aren't.
+    def _white_checker_at_point(self, point: int) -> bool:
+        """Check if there's a white checker at given point."""
+        for checker in self.__board__.get_checkers_in_field(str(point)):
+            if checker.get_colour() == "White":
+                return True
+        return False
+
+    ######################################################################################
 
     # This method receives the point where the chosen checker is and the steps as parameters.
     # It returns True if the move is valid or not.

@@ -281,3 +281,121 @@ Prueba todos los caminos posibles de tu código
 
 # Used with changes. Replaced the original check_move_to_house method with the response. Checked if there were errors in the logic (didn't identify any) and re-commented in english.
 # Modified file: core/backgammon_game.py
+
+## 3. Deepseek (same chat)
+## Prompt:
+Hermoso, pero hay un problema más con los métodos que me sugeriste para agregar: Pylint dice que hay demasiados returns 7/6 en cada una. No se me ocurre bien cómo resumirlo.
+
+## Answer:
+Tienes razón. Pylint recomienda tener máximo 6 return statements por función. Voy a simplificar la lógica reduciendo los returns:
+
+Solución para Black:
+python
+def _check_black_move_to_house(self, origin: str, steps: int) -> bool:
+    """Helper method for black's move to house."""
+    destination = self.get_destination_point(int(origin), steps)
+    
+    if destination <= 24:
+        return False  # No es movimiento a casa
+    
+    # Verificar si hay fichas fuera del cuadro de salida o comidas
+    if self._black_has_checkers_out_of_house():
+        return False
+    
+    # Verificar movimientos válidos para sacar fichas
+    return self._is_valid_black_bear_off(steps)
+
+def _black_has_checkers_out_of_house(self) -> bool:
+    """Check if black has checkers outside home board or eaten."""
+    # Verificar fichas en puntos 1-18
+    for i in range(1, 19):
+        for checker in self.__board__.get_checkers_in_field(str(i)):
+            if checker.get_colour() == "Black":
+                return True
+    
+    # Verificar fichas comidas
+    return self.check_eaten_checkers("Black")
+
+def _is_valid_black_bear_off(self, steps: int) -> bool:
+    """Check if black can legally bear off with given steps."""
+    point_to_check = 25 - steps
+    
+    # Verificar si hay fichas en el punto exacto
+    if self._has_black_checker_at_point(point_to_check):
+        return True
+    
+    # Verificar puntos más lejanos
+    for i_point in range(19, point_to_check + 1):
+        if self._has_black_checker_at_point(i_point):
+            return i_point >= point_to_check  # Solo válido si está en o más cerca
+    
+    return False
+
+def _has_black_checker_at_point(self, point: int) -> bool:
+    """Check if there's a black checker at given point."""
+    for checker in self.__board__.get_checkers_in_field(str(point)):
+        if checker.get_colour() == "Black":
+            return True
+    return False
+Solución para White:
+python
+def _check_white_move_to_house(self, origin: str, steps: int) -> bool:
+    """Helper method for white's move to house."""
+    destination = self.get_destination_point(int(origin), steps)
+    
+    if destination >= 1:
+        return False  # No es movimiento a casa
+    
+    # Verificar si hay fichas fuera del cuadro de salida o comidas
+    if self._white_has_checkers_out_of_house():
+        return False
+    
+    # Verificar movimientos válidos para sacar fichas
+    return self._is_valid_white_bear_off(steps)
+
+def _white_has_checkers_out_of_house(self) -> bool:
+    """Check if white has checkers outside home board or eaten."""
+    # Verificar fichas en puntos 7-24
+    for i in range(7, 25):
+        for checker in self.__board__.get_checkers_in_field(str(i)):
+            if checker.get_colour() == "White":
+                return True
+    
+    # Verificar fichas comidas
+    return self.check_eaten_checkers("White")
+
+def _is_valid_white_bear_off(self, steps: int) -> bool:
+    """Check if white can legally bear off with given steps."""
+    point_to_check = steps
+    
+    # Verificar si hay fichas en el punto exacto
+    if self._has_white_checker_at_point(point_to_check):
+        return True
+    
+    # Verificar puntos más lejanos
+    for i_point in range(6, point_to_check - 1, -1):
+        if self._has_white_checker_at_point(i_point):
+            return i_point <= point_to_check  # Solo válido si está en o más cerca
+    
+    return False
+
+def _has_white_checker_at_point(self, point: int) -> bool:
+    """Check if there's a white checker at given point."""
+    for checker in self.__board__.get_checkers_in_field(str(point)):
+        if checker.get_colour() == "White":
+            return True
+    return False
+Beneficios de esta solución:
+Máximo 3-4 returns por función (cumple con Pylint)
+
+Código más modular y reusable
+
+Mayor legibilidad
+
+Métodos más cortos y enfocados
+
+Lógica más clara
+
+Cada método ahora tiene una responsabilidad única y los returns están mejor organizados.
+
+## Used with changes. Replaced each method for checking a move to the house with the suggested methods. Re-comemented in english and fixed some method names and descriptions.
