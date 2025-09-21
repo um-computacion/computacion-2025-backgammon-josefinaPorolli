@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.22] - 20/09/25
+
+### Added
+
+- Class Backgammon Game: added method for checking if the chosen checker can be moved to the house.
+
+### Changed
+
+- Class Backgammon Game: replaced the block in check_move that checked if the checker could be moved to the house for the new method
+- Class Backgammon Game: before moving the checker in move_checker_to_house(), the method checks if the move is valid with the new method.
+
 ## [0.0.21] - 20/09/25
 
 ### Added
