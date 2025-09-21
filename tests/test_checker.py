@@ -4,6 +4,7 @@ import unittest
 from core.checker import Checker
 
 class TestChecker(unittest.TestCase):
+    """Test for methods in class Checker"""
     def setUp(self):
         self.checker = Checker(1, "Black") # First 15 checkers are black, next 15 are white
 

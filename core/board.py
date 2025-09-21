@@ -56,9 +56,9 @@ class Board:
     def get_checkers_in_field(self, k:str) -> list:
         """Getter for the checkers in a specific field"""
         return self.__board__[k]
-    
+
     # SETTERS
-    # This method receives a k parameter, representing the index of the field we want to add a checker to.
+    # This method receives a k parameter, which is field we want to add a checker to.
     # It also receives a checker parameter, representing the checker we want to add to the field.
     # It adds the checker to the field.
     # It does not return any value.
@@ -66,7 +66,7 @@ class Board:
         """Setter for adding a checker to a specific field"""
         self.__board__[k].append(checker)
 
-    # This method receives a k parameter, representing the index of the field we want to remove a checker from.
+    # This method receives a k parameter, which is the field we want to remove a checker from.
     # It removes the last checker added to the field.
     # It returns the checker that was removed from the field
     def remove_checker_from_field(self, k:str):
