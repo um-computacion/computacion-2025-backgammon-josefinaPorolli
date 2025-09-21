@@ -20,14 +20,27 @@ class BackgammonGame:
         self.__player2__ = Player("Player 2", "Black")
     
     # ---------- TURNS -------------
-    # SETTER
+    # SETTERS
     # This method receives the colour of the player as a parameter.
     # It sets 'turn' with the colour of the player whose turn is.
     def set_turn(self, colour):
         """Sets the colour of the player whose turn is"""
         self.__turn__ = colour
+
+    # This method does not receive any parameters.
+    # It checks if the 15 checkers of a player is in the house
+    # If there are 15 checkers in one of the houses, it sets the winner.
+    # It returns "None" (as string for preventing problems) if there is no winner or the colour of the winner if there is.
+    def check_winner(self) -> str:
+        if len(self.__board__["BHouse"]) == 15:
+            return "Black"
+        elif len(self.__board__["WHouse"]) == 15:
+            return "White"
+        else:
+            return "None"
+
     
-    # GETTER
+    # GETTERS
     # This method does not receive any parameters.
     # It returns the colour of the player whose turn is.
     def get_turn(self) -> str:
@@ -309,4 +322,3 @@ class BackgammonGame:
         elif self.get_turn() == "White":
             if self.check_move_to_house():
                 self.move_checker(origin, "WHouse")
-        
