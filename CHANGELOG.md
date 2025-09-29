@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 29/09/25
+
+### Changed
+
+- Class Backgammon Game: fixed pylint errors in core/backgammon_game.py related to the method that checks the move. Added sub-methods to reduce the quantity of returns in each method and fixed inconsistent return statements.
+
 ## [0.1.2] - 21/09/25
 
 ### Changed

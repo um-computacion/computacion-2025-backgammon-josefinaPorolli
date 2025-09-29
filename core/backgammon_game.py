@@ -284,65 +284,63 @@ class BackgammonGame:
 
     ######################################################################################
 
+    # This method is a helper for check_move, checking specifically black moves.
+    # It receives the current point and the steps as parameters
+    # It returns True if the move is valid and false if it is not.
+    def _check_black_move(self, point: str, steps: int) -> bool:
+        # The moves will increment from 1 to 24
+        destination = self.get_destination_point(point, steps)
+
+        # First check if there are eaten checkers.
+        # If there are, the player must take them out before moving any other checker.
+        # First check if there are eaten checkers.
+        if self.check_eaten_checkers("Black"):
+            # If there are, check if it is possible to take one out with the given steps.
+            return self.check_take_out_eaten_checker("Black")
+
+        if destination > 24: # If the checker tries to go off the board
+            return self.check_move_to_house(point, steps) # Check if it can enter the house.
+
+        # Check of there is any opponent checker in the destination point
+        if self.check_opponent_checkers(destination):
+            # If there are, we check if it is eatable (only 1 opponent checker)
+            # If there is, the move is valid and the checker can be eaten.
+            return self.check_eatable_checker(destination)
+        return True
+
+    # This method is a helper for check_move, checking specifically white moves.
+    # It receives the current point and the steps as parameters
+    # It returns True if the move is valid and false if it is not.
+    def _check_white_move(self, point:str, steps:int) -> bool:
+         # The moves will decrement from 24 to 1
+        destination = self.get_destination_point(point, steps)
+
+        # First check if there are eaten checkers.
+        # If there are, the player must take them out before moving any other checker.
+        # First check if there are eaten checkers.
+        if self.check_eaten_checkers("Black"):
+            # If there are, check if it is possible to take one out with the given steps.
+            return self.check_take_out_eaten_checker("Black")
+
+        if destination < 1: # If the checker tries to go off the board
+            return self.check_move_to_house(point, steps) # Check if it can enter the house.
+
+        # Check of there is any opponent checker in the destination point
+        if self.check_opponent_checkers(destination):
+            # If there are, we check if it is eatable (only 1 opponent checker)
+            return self.check_eatable_checker(destination)
+        return True
+
     # This method receives the point where the chosen checker is and the steps as parameters.
     # It returns True if the move is valid or not.
     # Returns False if the move is not valid. Returns True if the move is valid.
     def check_move(self, point:str, steps:int) -> bool:
         """This method evaluates if the move that is going to be made is valid"""
         if self.get_turn() == "Black":
-
-            # The moves will increment from 1 to 24
-            destination = self.get_destination_point(point, steps)
-
-            # First check if there are eaten checkers.
-            # If there are, the player must take them out before moving any other checker.
-            # First check if there are eaten checkers.
-            if self.check_eaten_checkers("Black"):
-                # If there are, check if it is possible to take one out with the given steps.
-                if self.check_take_out_eaten_checker("Black"):
-                    return True
-                return False
-
-            if destination > 24: # If the checker tries to go off the board
-                if self.check_move_to_house(point, steps): # Check if it can enter the house.
-                    return True
-                return False
-
-            # Check of there is any opponent checker in the destination point
-            if self.check_opponent_checkers(destination):
-                # If there are, we check if it is eatable (only 1 opponent checker)
-                if self.check_eatable_checker(destination):
-                    # If there is, the move is valid and the checker can be eaten.
-                    return True
-                return False
-            return True
-
+            return self._check_black_move(point, steps)
         if self.get_turn() == "White":
-
-            # The moves will decrement from 24 to 1
-            destination = self.get_destination_point(point, steps)
-
-            # First check if there are eaten checkers.
-            # If there are, the player must take them out before moving any other checker.
-            # First check if there are eaten checkers.
-            if self.check_eaten_checkers("Black"):
-                # If there are, check if it is possible to take one out with the given steps.
-                if self.check_take_out_eaten_checker("Black"):
-                    return True
-                return False
-
-            if destination < 1: # If the checker tries to go off the board
-                if self.check_move_to_house(point, steps): # Check if it can enter the house.
-                    return True
-                return False
-
-            # Check of there is any opponent checker in the destination point
-            if self.check_opponent_checkers(destination):
-                # If there are, we check if it is eatable (only 1 opponent checker)
-                if self.check_eatable_checker(destination):
-                    return True
-                return False
-            return True
+            return self._check_white_move(point, steps)
+        return False # Default
 
     # -------------- MAKE MOVES --------------
 
