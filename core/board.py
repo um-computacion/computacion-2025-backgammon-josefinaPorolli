@@ -37,7 +37,7 @@ class Board:
             "24": [],
             # Places where the checkers have to be put in order to win
             "BHouse": [],
-            "Whouse": [],
+            "WHouse": [],
             # Places where the checkers are put in case they are eaten by another
             "BEaten": [],
             "WEaten": []
