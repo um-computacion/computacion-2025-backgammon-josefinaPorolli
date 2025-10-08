@@ -3,6 +3,7 @@
 from .board import Board
 from .player import Player
 from .dice import Dice
+from .checker import Checker
 
 # --- Methods to be added (temporary comment)---
 # Check winner
@@ -61,6 +62,41 @@ class BackgammonGame:
         raise ValueError(f"Could not get a valid turn: {self.get_turn()}")
 
     # METHODS FOR THE GAME
+
+    # SET DEFAULT CHECKERS AT THE BEGINNING OF THE GAME
+    # This method does not receive any parameters.
+    # It sets the initial position of the checkers on the board.
+    # It does not return any value.
+    def set_default_checkers(self):
+        """Method for setting the initial position of the checkers"""
+        white_checkers = []
+        black_checkers = []
+
+        # Crear 15 fichas de cada color
+        for i in range(1, 16):
+            white_checkers.append(Checker(i, "White"))
+            black_checkers.append(Checker(i, "Black"))
+
+        # Distribución para BLANCAS
+        for _ in range(2):
+            self.__board__.add_checker_to_field("24", white_checkers.pop())
+        for _ in range(5):
+            self.__board__.add_checker_to_field("13", white_checkers.pop())
+        for _ in range(3):
+            self.__board__.add_checker_to_field("8", white_checkers.pop())
+        for _ in range(5):
+            self.__board__.add_checker_to_field("6", white_checkers.pop())
+
+        # Distribución para NEGRAS
+        for _ in range(2):
+            self.__board__.add_checker_to_field("1", black_checkers.pop())
+        for _ in range(5):
+            self.__board__.add_checker_to_field("12", black_checkers.pop())
+        for _ in range(3):
+            self.__board__.add_checker_to_field("17", black_checkers.pop())
+        for _ in range(5):
+            self.__board__.add_checker_to_field("19", black_checkers.pop())
+
 
     # -------------- CHECK MOVES --------------
 
