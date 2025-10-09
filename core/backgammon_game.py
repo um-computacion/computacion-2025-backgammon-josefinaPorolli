@@ -18,6 +18,39 @@ class BackgammonGame:
         self.__dice2__ = Dice()
         self.__player1__ = Player("Player 1", "White")
         self.__player2__ = Player("Player 2", "Black")
+        # Creating 15 checkers for each player
+        self.__B_1__ = Checker(1, "Black")
+        self.__B_2__ = Checker(2, "Black")
+        self.__B_3__ = Checker(3, "Black")
+        self.__B_4__ = Checker(4, "Black")
+        self.__B_5__ = Checker(5, "Black")
+        self.__B_6__ = Checker(6, "Black")
+        self.__B_7__ = Checker(7, "Black")
+        self.__B_8__ = Checker(8, "Black")
+        self.__B_9__ = Checker(9, "Black")
+        self.__B_10__ = Checker(10, "Black")
+        self.__B_11__ = Checker(11, "Black")
+        self.__B_12__ = Checker(12, "Black")
+        self.__B_13__ = Checker(13, "Black")
+        self.__B_14__ = Checker(14, "Black")
+        self.__B_15__ = Checker(15, "Black")
+        self.__W_1__ = Checker(16, "White")
+        self.__W_2__ = Checker(17, "White")
+        self.__W_3__ = Checker(18, "White")
+        self.__W_4__ = Checker(19, "White")
+        self.__W_5__ = Checker(20, "White")
+        self.__W_6__ = Checker(21, "White")
+        self.__W_7__ = Checker(22, "White")
+        self.__W_8__ = Checker(23, "White")
+        self.__W_9__ = Checker(24, "White")
+        self.__W_10__ = Checker(25, "White")
+        self.__W_11__ = Checker(26, "White")
+        self.__W_12__ = Checker(27, "White")
+        self.__W_13__ = Checker(28, "White")
+        self.__W_14__ = Checker(29, "White")
+        self.__W_15__ = Checker(30, "White")
+
+
 
     # ---------- TURNS -------------
     # SETTERS
@@ -69,13 +102,12 @@ class BackgammonGame:
     # It does not return any value.
     def set_default_checkers(self):
         """Method for setting the initial position of the checkers"""
-        white_checkers = []
-        black_checkers = []
-
-        # Crear 15 fichas de cada color
-        for i in range(1, 16):
-            white_checkers.append(Checker(i, "White"))
-            black_checkers.append(Checker(i, "Black"))
+        white_checkers = [self.__W_1__, self.__W_2__, self.__W_3__, self.__W_4__, self.__W_5__,
+                          self.__W_6__, self.__W_7__, self.__W_8__, self.__W_9__, self.__W_10__,
+                          self.__W_11__, self.__W_12__, self.__W_13__, self.__W_14__, self.__W_15__]
+        black_checkers = [self.__B_1__, self.__B_2__, self.__B_3__, self.__B_4__, self.__B_5__,
+                          self.__B_6__, self.__B_7__, self.__B_8__, self.__B_9__, self.__B_10__,
+                          self.__B_11__, self.__B_12__, self.__B_13__, self.__B_14__, self.__B_15__]
 
         # Distribución para BLANCAS
         for _ in range(2):

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 08/10/25
+
+### Added
+
+- Added tests for backgammon game. Set and get turn, set default checkers and check winner. Unittest used places in memory for checking the default checkers, so I had to look for an alternative usind the IDs i gave each checker.
+
+### Changed
+
+- Added __ in variables for test_board.py
+- Changed method set_default_cehckers for getting an easier access to the checkers and added each single checker in the constructor.
+
 ## [0.1.6] - 07/10/25
 
 ### Added
