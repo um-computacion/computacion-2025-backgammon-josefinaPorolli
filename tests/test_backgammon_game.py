@@ -2,18 +2,20 @@
 import unittest
 from core.backgammon_game import BackgammonGame
 
-class testBackgammonGame(unittest.TestCase):
+class TestBackgammonGame(unittest.TestCase):
     """Test for methods in class BackgammonGame"""
     def setUp(self):
         self.__game__ = BackgammonGame()
 
     def test_set_and_get_turn(self):
+        """Method for testing turn setter and getter"""
         self.__game__.set_turn("Black")
         self.assertEqual(self.__game__.get_turn(), "Black")
         self.__game__.set_turn("White")
         self.assertEqual(self.__game__.get_turn(), "White")
 
     def test_set_default_checkers(self):
+        """Method for testing default checkers setting"""
         self.__game__.set_default_checkers()
 
         # Furthest checkers to each player's house
@@ -31,13 +33,15 @@ class testBackgammonGame(unittest.TestCase):
 
         # Next set of checkers (nearer to each player's house)
         actual_checkers = self.__game__.__board__.get_checkers_in_field("12")
-        expected_checkers = [self.__game__.__b_13__, self.__game__.__b_12__, self.__game__.__b_11__, self.__game__.__b_10__, self.__game__.__b_9__]
+        expected_checkers = [self.__game__.__b_13__, self.__game__.__b_12__,
+                            self.__game__.__b_11__, self.__game__.__b_10__, self.__game__.__b_9__]
         actual_ids = [checker.get_id() for checker in actual_checkers]
         expected_ids = [checker.get_id() for checker in expected_checkers]
         self.assertEqual(actual_ids, expected_ids)
 
         actual_checkers = self.__game__.__board__.get_checkers_in_field("13")
-        expected_checkers = [self.__game__.__w_13__, self.__game__.__w_12__, self.__game__.__w_11__, self.__game__.__w_10__, self.__game__.__w_9__]
+        expected_checkers = [self.__game__.__w_13__, self.__game__.__w_12__,
+                            self.__game__.__w_11__, self.__game__.__w_10__, self.__game__.__w_9__]
         actual_ids = [checker.get_id() for checker in actual_checkers]
         expected_ids = [checker.get_id() for checker in expected_checkers]
         self.assertEqual(actual_ids, expected_ids)
@@ -57,18 +61,21 @@ class testBackgammonGame(unittest.TestCase):
 
         # Nearest checkers to each player's house
         actual_checkers = self.__game__.__board__.get_checkers_in_field("19")
-        expected_checkers = [self.__game__.__b_5__, self.__game__.__b_4__, self.__game__.__b_3__, self.__game__.__b_2__, self.__game__.__b_1__]
+        expected_checkers = [self.__game__.__b_5__, self.__game__.__b_4__,
+                            self.__game__.__b_3__, self.__game__.__b_2__, self.__game__.__b_1__]
         actual_ids = [checker.get_id() for checker in actual_checkers]
         expected_ids = [checker.get_id() for checker in expected_checkers]
         self.assertEqual(actual_ids, expected_ids)
 
         actual_checkers = self.__game__.__board__.get_checkers_in_field("6")
-        expected_checkers = [self.__game__.__w_5__, self.__game__.__w_4__, self.__game__.__w_3__, self.__game__.__w_2__, self.__game__.__w_1__]
+        expected_checkers = [self.__game__.__w_5__, self.__game__.__w_4__,
+                            self.__game__.__w_3__, self.__game__.__w_2__, self.__game__.__w_1__]
         actual_ids = [checker.get_id() for checker in actual_checkers]
         expected_ids = [checker.get_id() for checker in expected_checkers]
         self.assertEqual(actual_ids, expected_ids)
 
     def test_check_winner(self):
+        """Method for check_winner testing"""
         # Check that there is no winner at first
         self.assertEqual("None", self.__game__.check_winner())
 
@@ -111,6 +118,7 @@ class testBackgammonGame(unittest.TestCase):
         self.assertEqual("Black", self.__game__.check_winner())
 
     def test_get_destination_point(self):
+        """Method for testing destination point calculation"""
         # Test for black checkers
         # 1. Set the turn to Black
         self.__game__.set_turn("Black")
@@ -132,6 +140,7 @@ class testBackgammonGame(unittest.TestCase):
         self.assertEqual(self.__game__.get_destination_point("WEaten", 6), "19")
 
     def test_eaten_checkers(self):
+        """Method for testing eaten checkers"""
         # At first, the spaces for eaten checkers are empty
         self.assertFalse(self.__game__.check_eaten_checkers("White"))
         self.assertFalse(self.__game__.check_eaten_checkers("Black"))
@@ -143,6 +152,7 @@ class testBackgammonGame(unittest.TestCase):
         self.assertTrue(self.__game__.check_eaten_checkers("Black"))
 
     def test_check_opponent_checkers(self):
+        """Method for testing if there are opponent checkers in a destination"""
         # Test for black turn
         self.__game__.set_turn("Black")
         # There should not be any checkers in any point, so an arbitrary one should return false
@@ -163,6 +173,7 @@ class testBackgammonGame(unittest.TestCase):
         self.assertTrue(self.__game__.check_opponent_checkers("20"))
 
     def test_check_eatable_checker(self):
+        """Method for testing if a checker can be eaten"""
         # Test for black turn
         self.__game__.set_turn("Black")
         # There should not be any checkers in any point, so an arbitrary one should return false
@@ -173,7 +184,8 @@ class testBackgammonGame(unittest.TestCase):
         self.assertTrue(self.__game__.check_eatable_checker("4"))
         # Add another white checker to point 4
         self.__game__.__board__.add_checker_to_field("4", self.__game__.__w_2__)
-        # Now the method should return false in that point as there is more than one checker in point 4
+        # Now the method should return false in that point
+        # as there is more than one checker in point 4
         self.assertFalse(self.__game__.check_eatable_checker("4"))
 
         # Test for white turn
@@ -187,10 +199,12 @@ class testBackgammonGame(unittest.TestCase):
         self.assertTrue(self.__game__.check_eatable_checker("20"))
         # Add another black checker to point 20
         self.__game__.__board__.add_checker_to_field("20", self.__game__.__b_2__)
-        # Now the method should return false in that point as there is more than one checker in point 20
+        # Now the method should return false in that point
+        # as there is more than one checker in point 20
         self.assertFalse(self.__game__.check_eatable_checker("20"))
 
     def test_check_take_out_eaten_checker(self):
+        """Method for testing if a checker can be taken out"""
         # At first, there will be no eaten checkers.
         # Set each turn and the method with an arbitrary number of steps (3) should return False
         self.__game__.set_turn("Black")
@@ -198,7 +212,7 @@ class testBackgammonGame(unittest.TestCase):
         self.__game__.set_turn("White")
         self.assertFalse(self.__game__.check_take_out_eaten_checker(3))
 
-        # Add checkers to the eaten fileds but not to the destination. The method should return false.
+        # Add checkers to the eaten fileds but not to the destination. It should return false.
         self.__game__.__board__.add_checker_to_field("BEaten", self.__game__.__b_1__)
         self.__game__.set_turn("Black")
         self.assertTrue(self.__game__.check_take_out_eaten_checker(3))
@@ -227,6 +241,7 @@ class testBackgammonGame(unittest.TestCase):
         self.assertFalse(self.__game__.check_take_out_eaten_checker(3))
 
     def test_check_move_to_house(self):
+        """Method for testing if a checker can be moved to the house"""
         # Add just one checker to the player's final square In this case, in the middle of it.
         self.__game__.__board__.add_checker_to_field("22", self.__game__.__b_1__)
         self.__game__.__board__.add_checker_to_field("3", self.__game__.__w_1__)
@@ -234,13 +249,13 @@ class testBackgammonGame(unittest.TestCase):
         self.__game__.set_turn("Black")
         self.assertTrue(self.__game__.check_move_to_house("22", 3))
         self.assertTrue(self.__game__.check_move_to_house("22", 4))
-        # If not, it should return False. 
+        # If not, it should return False.
         self.assertFalse(self.__game__.check_move_to_house("22", 2))
         # Same case with white
         self.__game__.set_turn("White")
         self.assertTrue(self.__game__.check_move_to_house("3", 3))
         self.assertTrue(self.__game__.check_move_to_house("3", 4))
-        # If not, it should return False. 
+        # If not, it should return False.
         self.assertFalse(self.__game__.check_move_to_house("3", 2))
 
         # Add a checker further than the selected one
@@ -269,8 +284,9 @@ class testBackgammonGame(unittest.TestCase):
         self.assertFalse(self.__game__.check_move_to_house("22", 2))
         self.__game__.set_turn("White")
         self.assertFalse(self.__game__.check_move_to_house("3", 2))
-    
+
     def test_check_move(self):
+        """Method for testing if a move is valid"""
         # Add checkers to random points
         self.__game__.__board__.add_checker_to_field("22", self.__game__.__b_1__)
         self.__game__.__board__.add_checker_to_field("3", self.__game__.__w_1__)
@@ -290,4 +306,4 @@ class testBackgammonGame(unittest.TestCase):
         self.assertFalse(self.__game__.check_move("21", 1)) # DOES NOT PASS. CHECK.
 
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()
