@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 09/10/25
+
+### Added
+
+- Added method _check_take_out_with_opponent_checker to backgammon game class as a correction to the test and in order to meet pylint expectations
+
+### Changed
+
+- Modifications in type of variable in get_destination_point, check_opponent_checkers and check_take_out_eaten_checker method in class Backgammon Game
+- Modified check_eatable_checker. Used get_colour() method because it was just evaulating the list and not the colour of the checker in the field
+- Changed the names of the variables of each checker to meet pylint expectations
+- Changed the range of points that _is_valid_bear_off method evaluates
+
 ## [0.1.7] - 08/10/25
 
 ### Added
