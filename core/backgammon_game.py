@@ -442,22 +442,31 @@ class BackgammonGame:
     # This method receives the origin point and the destination point as parameters.
     # It moves the checker from origin to destination.
     # It does not return any value.
-    def move_checker(self, origin:str, steps:str):
+    def move_checker(self, origin:str, steps:int):
         """This method moves the checker from origin to destination"""
         destination = self.get_destination_point(origin, steps)
-        if self.check_take_out_eaten_checker(steps):
-            if self.check_opponent_checkers(destination):
-                if self.check_eatable_checker(destination):
-                    self.eat_opponent_checker(destination)
-                    self.take_out_eaten_checker(steps)
+        
+        # Moves from eaten fields
+        if origin == "BEaten" or origin == "WEaten":
+            if self.check_take_out_eaten_checker(steps):
+                if self.check_opponent_checkers(destination):
+                    if self.check_eatable_checker(destination):
+                        self.eat_opponent_checker(destination)
+                checker_to_move = self.__board__.remove_checker_from_field(origin)
+                self.__board__.add_checker_to_field(destination, checker_to_move)
+            return  # End the method
+        
+        # Normal case
         if self.check_move_to_house(origin, steps):
             if self.get_turn() == "Black":
                 destination = "BHouse"
-            if self.get_turn() == "White":
+            elif self.get_turn() == "White":
                 destination = "WHouse"
+        
         if self.check_opponent_checkers(destination):
             if self.check_eatable_checker(destination):
                 self.eat_opponent_checker(destination)
+        
         moving_checker = self.__board__.remove_checker_from_field(origin)
         self.__board__.add_checker_to_field(destination, moving_checker)
 
@@ -472,15 +481,3 @@ class BackgammonGame:
         elif self.get_turn() == "White":
             eaten_checker = self.__board__.remove_checker_from_field(str(origin))
             self.__board__.add_checker_to_field("BEaten", eaten_checker)
-
-    # This method receives the steps as a parameter.
-    # It takes the checker from the "eaten" field and puts it back on the board.
-    # It does not return any value.
-    def take_out_eaten_checker(self, steps:int):
-        """This method takes the checker out of the 'eaten' field and puts it back on the board."""
-        if self.get_turn() == "Black":
-            checker_to_put_back = self.__board__.remove_checker_from_field("BEaten")
-            self.__board__.add_checker_to_field(str(steps), checker_to_put_back)
-        elif self.get_turn() == "White":
-            checker_to_put_back = self.__board__.remove_checker_from_field("WEaten")
-            self.__board__.add_checker_to_field(str(25 - steps), checker_to_put_back)
