@@ -18,6 +18,39 @@ class BackgammonGame:
         self.__dice2__ = Dice()
         self.__player1__ = Player("Player 1", "White")
         self.__player2__ = Player("Player 2", "Black")
+        # Creating 15 checkers for each player
+        self.__b_1__ = Checker(1, "Black")
+        self.__b_2__ = Checker(2, "Black")
+        self.__b_3__ = Checker(3, "Black")
+        self.__b_4__ = Checker(4, "Black")
+        self.__b_5__ = Checker(5, "Black")
+        self.__b_6__ = Checker(6, "Black")
+        self.__b_7__ = Checker(7, "Black")
+        self.__b_8__ = Checker(8, "Black")
+        self.__b_9__ = Checker(9, "Black")
+        self.__b_10__ = Checker(10, "Black")
+        self.__b_11__ = Checker(11, "Black")
+        self.__b_12__ = Checker(12, "Black")
+        self.__b_13__ = Checker(13, "Black")
+        self.__b_14__ = Checker(14, "Black")
+        self.__b_15__ = Checker(15, "Black")
+        self.__w_1__ = Checker(16, "White")
+        self.__w_2__ = Checker(17, "White")
+        self.__w_3__ = Checker(18, "White")
+        self.__w_4__ = Checker(19, "White")
+        self.__w_5__ = Checker(20, "White")
+        self.__w_6__ = Checker(21, "White")
+        self.__w_7__ = Checker(22, "White")
+        self.__w_8__ = Checker(23, "White")
+        self.__w_9__ = Checker(24, "White")
+        self.__w_10__ = Checker(25, "White")
+        self.__w_11__ = Checker(26, "White")
+        self.__w_12__ = Checker(27, "White")
+        self.__w_13__ = Checker(28, "White")
+        self.__w_14__ = Checker(29, "White")
+        self.__w_15__ = Checker(30, "White")
+
+
 
     # ---------- TURNS -------------
     # SETTERS
@@ -49,16 +82,16 @@ class BackgammonGame:
 
     # This method receives the origin point and the steps as parameters.
     # It returns the destination point given the origin and the steps.
-    def get_destination_point(self, origin:int, steps:int) -> int:
+    def get_destination_point(self, origin:str, steps:int) -> int:
         """This method returns the destination point given the origin and the steps."""
         if self.get_turn() == "Black":
             if origin == "BEaten":
-                return steps
-            return origin + steps
+                return str(steps)
+            return str(int(origin) + steps)
         if self.get_turn() == "White":
             if origin == "WEaten":
-                return 25 - steps
-            return origin - steps
+                return str(25 - steps)
+            return str(int(origin) - steps)
         raise ValueError(f"Could not get a valid turn: {self.get_turn()}")
 
     # METHODS FOR THE GAME
@@ -69,13 +102,12 @@ class BackgammonGame:
     # It does not return any value.
     def set_default_checkers(self):
         """Method for setting the initial position of the checkers"""
-        white_checkers = []
-        black_checkers = []
-
-        # Crear 15 fichas de cada color
-        for i in range(1, 16):
-            white_checkers.append(Checker(i, "White"))
-            black_checkers.append(Checker(i, "Black"))
+        white_checkers = [self.__w_1__, self.__w_2__, self.__w_3__, self.__w_4__, self.__w_5__,
+                          self.__w_6__, self.__w_7__, self.__w_8__, self.__w_9__, self.__w_10__,
+                          self.__w_11__, self.__w_12__, self.__w_13__, self.__w_14__, self.__w_15__]
+        black_checkers = [self.__b_1__, self.__b_2__, self.__b_3__, self.__b_4__, self.__b_5__,
+                          self.__b_6__, self.__b_7__, self.__b_8__, self.__b_9__, self.__b_10__,
+                          self.__b_11__, self.__b_12__, self.__b_13__, self.__b_14__, self.__b_15__]
 
         # Distribución para BLANCAS
         for _ in range(2):
@@ -128,13 +160,13 @@ class BackgammonGame:
     def check_opponent_checkers(self, destination:str) -> bool:
         """This method checks if there are more than 1 opponent checkers in the destination point"""
         if self.get_turn() == "Black":
-            if len(self.__board__.get_checkers_in_field(int(destination))) > 0:
-                if self.__board__.get_checkers_in_field((destination))[0].get_colour() == "White":
+            if len(self.__board__.get_checkers_in_field(destination)) > 0:
+                if self.__board__.get_checkers_in_field(destination)[0].get_colour() == "White":
                     return True
             return False
         if self.get_turn() == "White":
-            if len(self.__board__.get_checkers_in_field(int(destination))) > 0:
-                if self.__board__.get_checkers_in_field((destination))[0].get_colour() == "Black":
+            if len(self.__board__.get_checkers_in_field(destination)) > 0:
+                if self.__board__.get_checkers_in_field(destination)[0].get_colour() == "Black":
                     return True
             return False
         raise ValueError(f"Could not get a valid turn: {self.get_turn()}")
@@ -144,19 +176,32 @@ class BackgammonGame:
     # It returns True if there is exactly one opponent checker or False if there aren't.
     # If there is only one checker, it can be eaten.
     # This method is a part of the check_move method.
-    def check_eatable_checker(self, destination:int) -> bool:
+    def check_eatable_checker(self, destination:str) -> bool:
         """This method checks if there is exactly one opponent checker in the destination point"""
         if self.get_turn() == "Black":
             if len(self.__board__.get_checkers_in_field(str(destination))) == 1:
-                if self.__board__.get_checkers_in_field(str(destination))[0] == "White":
+                if self.__board__.get_checkers_in_field(str(destination))[0].get_colour()=="White":
                     return True
             return False
         if self.get_turn() == "White":
             if len(self.__board__.get_checkers_in_field(str(destination))) == 1:
-                if self.__board__.get_checkers_in_field(str(destination))[0] == "Black":
+                if self.__board__.get_checkers_in_field(str(destination))[0].get_colour()=="Black":
                     return True
             return False
         raise ValueError(f"Could not get a valid turn: {self.get_turn()}")
+
+    # This method receives destination as a parameter
+    # It is a helper method for check_take_out_eaten_checker
+    # It returns True if the checker can be taken out based
+    # on the presence of an opponent checker. Otherwise, it returns False.
+    def _check_take_out_with_opponent_checker(self, destination:str):
+        """Helper method for check_take_out_eaten_checker"""
+        if self.check_opponent_checkers(str(destination)):
+            # Check if the checker is eatable
+            if self.check_eatable_checker(str(destination)):
+                return True
+            return False
+        return True
 
     # This method receives steps as parameters.
     # It evaluates if a checker can be taken out of the eaten field
@@ -169,18 +214,14 @@ class BackgammonGame:
             if self.check_eaten_checkers("Black"):
                 # Check if the point where the checker has to enter
                 # is not blocked by 2 or more white checkers
-                if self.check_opponent_checkers(steps):
-                    return False
-                return True
+                return self._check_take_out_with_opponent_checker(str(steps))
             return False
         if self.get_turn() == "White":
             # Check if there are any eaten checkers
             if self.check_eaten_checkers("White"):
                 # Check if the point where the checker has to enter
                 # is not blocked by 2 or more black checkers
-                if self.check_opponent_checkers(25 - steps):
-                    return False
-                return True
+                return self._check_take_out_with_opponent_checker(str(25 - steps))
             return False
         raise ValueError(f"Could not get a valid turn: {self.get_turn()}")
 
@@ -205,9 +246,12 @@ class BackgammonGame:
     # It returns True if the checker can enter the house. It returns False if it can´t.
     def _check_black_move_to_house(self, origin: str, steps: int) -> bool:
         """Helper method for check_move_to_house in Black case."""
-        destination = self.get_destination_point(int(origin), steps)
+        if origin == "BEaten":
+            destination = self.get_destination_point(origin, steps)
+        else:
+            destination = self.get_destination_point(int(origin), steps)
 
-        if destination <= 24:
+        if int(destination) <= 24:
             return False  # Not a move to the black house
 
         # Check checkers out of the player's square or eaten checkers
@@ -215,7 +259,7 @@ class BackgammonGame:
             return False
 
         # Check valid moves to take out checkers
-        return self._is_valid_black_bear_off(steps)
+        return self._is_valid_black_bear_off(origin, steps)
 
     ############## SUB METHODS FOR CHECKING BLACK MOVE TO THE HOUSE ###################
     # This method does not receive any parameters.
@@ -232,22 +276,25 @@ class BackgammonGame:
         return self.check_eaten_checkers("Black")
 
     # This method receives steps as a parameter.
-    # It returns True if the Black player can move checkers to the house and false if he/she can't.
-    def _is_valid_black_bear_off(self, steps: int) -> bool:
-        """Check if black can legally move to the house with the given steps."""
+    # It returns True if the Black player can move a specific checker to the house and false if he/she can't.
+    def _is_valid_black_bear_off(self, origin: str, steps: int) -> bool:
+        """Check if the specific black checker can be moved to the house."""
+        origin_point = int(origin)
         point_to_check = 25 - steps
+        
+        # Check if the checker is in the exact point
+        if origin_point == point_to_check:
+            return True  # Exactly in the point, can be taken out
 
-        # Check checkers in the exact point
-        if self._black_checker_at_point(point_to_check):
-            return True
-
-        # Check further points
-        for i_point in range(19, point_to_check + 1): # From pint 19 to the evaluated point
+        # If not in the exact point, check that there are no further checkers
+        # Find the FURTHEST checker (highest point in home board)
+        lowest_point = 25
+        for i_point in range(19, 25):
             if self._black_checker_at_point(i_point):
-                # Returns True (valid move) if the checker is in the exact point or nearer
-                return i_point >= point_to_check
+                lowest_point = min(lowest_point, i_point)
 
-        return False
+        # Solo puede sacar esta ficha si no hay fichas más lejanas
+        return origin_point <= lowest_point
 
     # This method receives an evaluated point.
     # Returns True if there are checkers in the exact point and False if there aren't.
@@ -265,9 +312,12 @@ class BackgammonGame:
     # It returns True if the checker can enter the house. It returns False if it can´t.
     def _check_white_move_to_house(self, origin: str, steps: int) -> bool:
         """Helper method for white's move to house."""
-        destination = self.get_destination_point(int(origin), steps)
+        if origin == "WEaten":
+            destination = self.get_destination_point(origin, steps)
+        else:
+            destination = self.get_destination_point(int(origin), steps)
 
-        if destination >= 1:
+        if int(destination) >= 1:
             return False  # Not a move to house
 
         # Check if there are checkers out of the player's square or eaten checkers
@@ -275,7 +325,7 @@ class BackgammonGame:
             return False
 
         # Check valid moves to take out checkers
-        return self._is_valid_white_bear_off(steps)
+        return self._is_valid_white_bear_off(origin, steps)
 
     ############## SUB METHODS FOR CHECKING WHITE MOVE TO THE HOUSE ###################
     # This method does not receive any parameters.
@@ -293,21 +343,24 @@ class BackgammonGame:
 
     # This method receives steps as a parameter.
     # It returns True if the Black player can move checkers to the house and false if he/she can't.
-    def _is_valid_white_bear_off(self, steps: int) -> bool:
-        """Check if white can legally bear off with given steps."""
+    def _is_valid_white_bear_off(self, origin:str, steps: int) -> bool:
+        """Check if the specific white checker can be moved to the house."""
+        origin_point = int(origin)
         point_to_check = steps
+        
+        # Check if the checker is in the exact point
+        if origin_point == point_to_check:
+            return True  # Exactly in the point, can be taken out
 
-        # Check if there are checkers in the exact point
-        if self._white_checker_at_point(point_to_check):
-            return True
-
-        # If there aren't checkers in the point, check further points in the same square.
-        for i_point in range(6, point_to_check - 1, -1):
+        # If not in the exact point, check that there are no further checkers
+        # Find the FURTHEST checker (highest point in home board)
+        highest_point = 0
+        for i_point in range(1, 7): # Check all points in the square
             if self._white_checker_at_point(i_point):
-                # Returns True if the checker is in the exact point or nearer
-                return i_point <= point_to_check
+                highest_point = max(highest_point, i_point)
 
-        return False
+        # Solo puede sacar esta ficha si no hay fichas más lejanas
+        return origin_point >= highest_point
 
     # This method receives an evaluated point.
     # Returns True if there are checkers in the exact point and False if there aren't.
@@ -331,10 +384,13 @@ class BackgammonGame:
         # If there are, the player must take them out before moving any other checker.
         # First check if there are eaten checkers.
         if self.check_eaten_checkers("Black"):
-            # If there are, check if it is possible to take one out with the given steps.
-            return self.check_take_out_eaten_checker("Black")
+            # If there are eaten checkers, check if this move is to take one out
+            if point == "BEaten":
+                return self.check_take_out_eaten_checker(steps)  # Put steps, not colour
+            else:
+                return False  # Cannot move other checkers while having eaten checkers
 
-        if destination > 24: # If the checker tries to go off the board
+        if int(destination) > 24: # If the checker tries to go off the board
             return self.check_move_to_house(point, steps) # Check if it can enter the house.
 
         # Check of there is any opponent checker in the destination point
@@ -354,11 +410,14 @@ class BackgammonGame:
         # First check if there are eaten checkers.
         # If there are, the player must take them out before moving any other checker.
         # First check if there are eaten checkers.
-        if self.check_eaten_checkers("Black"):
-            # If there are, check if it is possible to take one out with the given steps.
-            return self.check_take_out_eaten_checker("Black")
+        if self.check_eaten_checkers("White"):
+            # If there are eaten checkers, check if this move is to take one out
+            if point == "WEaten":
+                return self.check_take_out_eaten_checker(steps)  # Put steps, not colour
+            else:
+                return False  # Cannot move other checkers while having eaten checkers
 
-        if destination < 1: # If the checker tries to go off the board
+        if int(destination) < 1: # If the checker tries to go off the board
             return self.check_move_to_house(point, steps) # Check if it can enter the house.
 
         # Check of there is any opponent checker in the destination point
@@ -383,8 +442,31 @@ class BackgammonGame:
     # This method receives the origin point and the destination point as parameters.
     # It moves the checker from origin to destination.
     # It does not return any value.
-    def move_checker(self, origin:str, destination:str):
+    def move_checker(self, origin:str, steps:int):
         """This method moves the checker from origin to destination"""
+        destination = self.get_destination_point(origin, steps)
+        
+        # Moves from eaten fields
+        if origin == "BEaten" or origin == "WEaten":
+            if self.check_take_out_eaten_checker(steps):
+                if self.check_opponent_checkers(destination):
+                    if self.check_eatable_checker(destination):
+                        self.eat_opponent_checker(destination)
+                checker_to_move = self.__board__.remove_checker_from_field(origin)
+                self.__board__.add_checker_to_field(destination, checker_to_move)
+            return  # End the method
+        
+        # Normal case
+        if self.check_move_to_house(origin, steps):
+            if self.get_turn() == "Black":
+                destination = "BHouse"
+            elif self.get_turn() == "White":
+                destination = "WHouse"
+        
+        if self.check_opponent_checkers(destination):
+            if self.check_eatable_checker(destination):
+                self.eat_opponent_checker(destination)
+        
         moving_checker = self.__board__.remove_checker_from_field(origin)
         self.__board__.add_checker_to_field(destination, moving_checker)
 
@@ -399,27 +481,3 @@ class BackgammonGame:
         elif self.get_turn() == "White":
             eaten_checker = self.__board__.remove_checker_from_field(str(origin))
             self.__board__.add_checker_to_field("BEaten", eaten_checker)
-
-    # This method receives the steps as a parameter.
-    # It takes the checker from the "eaten" field and puts it back on the board.
-    # It does not return any value.
-    def take_out_eaten_checker(self, steps:int):
-        """This method takes the checker out of the 'eaten' field and puts it back on the board."""
-        if self.get_turn() == "Black":
-            checker_to_put_back = self.__board__.remove_checker_from_field("BEaten")
-            self.__board__.add_checker_to_field(str(steps), checker_to_put_back)
-        elif self.get_turn() == "White":
-            checker_to_put_back = self.__board__.remove_checker_from_field("WEaten")
-            self.__board__.add_checker_to_field(str(25 - steps), checker_to_put_back)
-
-    # This method receives the origin point as a parameter.
-    # It moves a checker from the origin to the player's house.
-    # It does not return any values.
-    def move_checker_to_house(self, origin:int):
-        """Moves a checker to the player's house"""
-        # Removed check for entering the house. Needed steps as parameter (useless in this method).
-        # The actual check will be done during the game
-        if self.get_turn() == "Black":
-            self.move_checker(origin, "BHouse")
-        elif self.get_turn() == "White":
-            self.move_checker(origin, "WHouse")

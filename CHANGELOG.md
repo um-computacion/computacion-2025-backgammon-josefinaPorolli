@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.11] - 11/10/25
+
+### Added
+
+- Finished tests for backgammon game
+
+### Changed
+
+- Changed some details in move_checker, as in some cases it tried to move more than 1 checker.
+- Finished tests for backgammon game
+
+## [0.1.10] - 11/10/25
+
+### Added
+
+- Almost finished tests for backgammon game
+
+### Changed
+
+- Changed is valid bear of methods. They only checked if there was a possibility to take a checker to the house, but didn't consider the origin as a parameter. Tests wouldn't pass.
+- Changed mechanism in move_checker method in Backgammon Game class, so that we only need the origin and the steps to make a move. Also added a mechanism to eat the opponent's checker if possible, take out an eaten checker and move a checker to the house (destination = house).
+- Changed the way that check move to house methods evaluate the origin, as it is not always a number.
+
+### Deleted
+
+- Deleted method move_checker_to_house. Move checker just sets the destination to the house if the move is valid.
+
+## [0.1.9] - 10/10/25
+
+### Changed
+
+- Changed different aspects in tests/ in order to meet pylint expectations
+
+## [0.1.8] - 10/10/25
+
+### Added
+
+- Added method _check_take_out_with_opponent_checker to backgammon game class as a correction to the test and in order to meet pylint expectations
+
+### Changed
+
+- Modifications in type of variable in get_destination_point, check_opponent_checkers and check_take_out_eaten_checker method in class Backgammon Game
+- Modified check_eatable_checker. Used get_colour() method because it was just evaulating the list and not the colour of the checker in the field
+- Changed the names of the variables of each checker to meet pylint expectations
+- Changed the range of points that _is_valid_bear_off method evaluates
+
+## [0.1.7] - 08/10/25
+
+### Added
+
+- Added tests for backgammon game. Set and get turn, set default checkers and check winner. Unittest used places in memory for checking the default checkers, so I had to look for an alternative usind the IDs i gave each checker.
+
+### Changed
+
+- Added __ in variables for test_board.py
+- Changed method set_default_cehckers for getting an easier access to the checkers and added each single checker in the constructor.
+
 ## [0.1.6] - 07/10/25
 
 ### Added
