@@ -303,7 +303,134 @@ class TestBackgammonGame(unittest.TestCase):
         # Add a checker to the BEaten field
         self.__game__.__board__.add_checker_to_field("BEaten", self.__game__.__b_4__)
         # Now the method should return False
-        self.assertFalse(self.__game__.check_move("21", 1)) # DOES NOT PASS. CHECK.
+        self.assertFalse(self.__game__.check_move("21", 1))
+        # If the player wants to take it out first and it is valid, return True
+        self.assertTrue(self.__game__.check_move("BEaten", 1))
+        # Add one white checker to the point. Should return True
+        self.__game__.__board__.add_checker_to_field("1", self.__game__.__w_4__)
+        self.assertTrue(self.__game__.check_move("BEaten", 1))
+        # Add another white checker, should return False
+        self.__game__.__board__.add_checker_to_field("1", self.__game__.__w_5__)
+        self.assertFalse(self.__game__.check_move("BEaten", 1))
+        # Remove the eaten checker to keep testing
+        self.__game__.__board__.remove_checker_from_field("BEaten")
+        # Test trying to eat a random checker
+        self.assertTrue(self.__game__.check_move("8", 1))
+        # Add another white checker to point 9, should return False
+        self.__game__.__board__.add_checker_to_field("9", self.__game__.__w_4__)
+        self.assertFalse(self.__game__.check_move("8", 1))
+        # Test trying to move to the house (not all checkers in the square)
+        self.assertFalse(self.__game__.check_move("22", 3))
+        self.assertTrue(self.__game__.check_move("22", 2))
+        # Move all black checkers to the square
+        self.__game__.__board__.remove_checker_from_field("21")
+        self.__game__.__board__.remove_checker_from_field("8")
+        self.__game__.__board__.remove_checker_from_field("9")
+        self.__game__.__board__.add_checker_to_field("20", self.__game__.__b_2__)
+        self.__game__.__board__.add_checker_to_field("20", self.__game__.__b_3__)
+        self.__game__.__board__.add_checker_to_field("20", self.__game__.__b_4__)
+        # Test against with larger dice (but same point 22) (False),
+        # same dice but from point 20 (True) and equal dice for point 22 (True)
+        self.assertFalse(self.__game__.check_move("22", 6))
+        self.assertTrue(self.__game__.check_move("20", 6))
+        self.assertTrue(self.__game__.check_move("22", 3))
+
+        # White's turn
+        self.__game__.set_turn("White")
+        # Check a valid move with no eaten checkers. Should return True.
+        self.assertTrue(self.__game__.check_move("3", 1))
+        self.assertTrue(self.__game__.check_move("4", 1))
+        # Add a checker to the WEaten field
+        self.__game__.__board__.add_checker_to_field("WEaten", self.__game__.__w_6__)
+        # Now the method should return False
+        self.assertFalse(self.__game__.check_move("3", 1))
+        # If the player wants to take it out first and it is valid, return True
+        self.assertTrue(self.__game__.check_move("WEaten", 1))
+        # Add one black checker to the point. Should return True
+        self.__game__.__board__.add_checker_to_field("24", self.__game__.__b_6__)
+        self.assertTrue(self.__game__.check_move("WEaten", 1))
+        # Add another black checker, should return False
+        self.__game__.__board__.add_checker_to_field("24", self.__game__.__b_7__)
+        self.assertFalse(self.__game__.check_move("WEaten", 1))
+        # Remove the eaten checker to keep testing
+        self.__game__.__board__.remove_checker_from_field("WEaten")
+        # Test trying to eat a random checker
+        # Add the checker
+        self.__game__.__board__.add_checker_to_field("8", self.__game__.__b_8__)
+        self.assertTrue(self.__game__.check_move("9", 1))
+        # Add another black checker to point 8, should return False
+        self.__game__.__board__.add_checker_to_field("8", self.__game__.__b_9__)
+        self.assertFalse(self.__game__.check_move("9", 1))
+        # Test trying to move to the house (not all checkers in the square)
+        self.assertFalse(self.__game__.check_move("3", 3))
+        self.assertTrue(self.__game__.check_move("3", 2))
+        # Move all white checkers to the square
+        self.__game__.__board__.remove_checker_from_field("9")
+        self.__game__.__board__.add_checker_to_field("5", self.__game__.__b_2__)
+        self.__game__.__board__.add_checker_to_field("5", self.__game__.__b_3__)
+        self.__game__.__board__.add_checker_to_field("5", self.__game__.__b_4__)
+        # Test again with larger dice (but same point 3) (False),
+        # same dice but from point 5 (True) and equal dice for point 3 (True)
+        self.assertFalse(self.__game__.check_move("3", 6))
+        self.assertTrue(self.__game__.check_move("5", 6))
+        self.assertTrue(self.__game__.check_move("3", 3))
+
+    def test_move_checkers(self):
+        """Method for testing moving checkers"""
+        # Add random checkers in random points
+        self.__game__.__board__.add_checker_to_field("21", self.__game__.__b_1__)
+        self.__game__.__board__.add_checker_to_field("22", self.__game__.__b_2__)
+        self.__game__.__board__.add_checker_to_field("5", self.__game__.__w_1__)
+        self.__game__.__board__.add_checker_to_field("4", self.__game__.__w_2__)
+        self.__game__.__board__.add_checker_to_field("2", self.__game__.__b_3__)
+        self.__game__.__board__.add_checker_to_field("24", self.__game__.__w_3__)
+        # Test that they are in their correct places
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("21"), [self.__game__.__b_1__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("22"), [self.__game__.__b_2__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("5"), [self.__game__.__w_1__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("4"), [self.__game__.__w_2__])
+        # Set turn to black
+        self.__game__.set_turn("Black")
+        # Test moving the checkers
+        self.__game__.move_checker("22", 1)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__])
+        self.__game__.move_checker("21", 2)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__, self.__game__.__b_1__])
+        # Test moving and eating checkers
+        self.__game__.move_checker("23", 1)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__b_1__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_3__])
+        # Take out the white checker from the eaten field to keep testing
+        self.__game__.__board__.remove_checker_from_field("WEaten")
+
+        # Set turn to white
+        self.__game__.set_turn("White")
+        # Test moving the checkers
+        self.__game__.move_checker("4", 1)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__])
+        self.__game__.move_checker("5", 2)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__, self.__game__.__w_1__])
+        # Test moving and eating checkers
+        self.__game__.move_checker("3", 1)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("2"), [self.__game__.__w_1__])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("BEaten"), [self.__game__.__b_3__])
+        # Take out the black checker from the eaten field to keep testing
+        self.__game__.__board__.remove_checker_from_field("BEaten")
+        # Test taking out two white checkers from the eaten field.
+        # Add two white checkers to the eaten field
+        self.__game__.__board__.add_checker_to_field("WEaten", self.__game__.__w_3__)
+        self.__game__.__board__.add_checker_to_field("WEaten", self.__game__.__w_4__)
+        self.__game__.move_checker("WEaten", 1)
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_4__]) ############# DOES NOT PASS #############
+        # Add a black checker that will be eaten
+        self.__game__.__board__.add_checker_to_field("24", self.__game__.__b_3__)
+        self.__game__.move_checker("WEaten", 1) ############# DOES NOT PASS #############
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [])
+        self.assertEqual(self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__w_3__,  self.__game__.__w_4__]) ############# DOES NOT PASS #############
+
+    
 
 if __name__ == "__main__":
     unittest.main()

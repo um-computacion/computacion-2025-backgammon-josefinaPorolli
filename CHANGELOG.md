@@ -5,7 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.8] - 09/10/25
+## [0.1.9] - 11/10/25
+
+### Added
+
+- Almost finished tests for backgammon game
+
+### Changed
+
+- Changed is valid bear of methods. They only checked if there was a possibility to take a checker to the house, but didn't consider the origin as a parameter. Tests wouldn't pass.
+- Changed mechanism in move_checker method in Backgammon Game class, so that we only need the origin and the steps to make a move. Also added a mechanism to eat the opponent's checker if possible, take out an eaten checker and move a checker to the house (destination = house).
+- Changed the way that check move to house methods evaluate the origin, as it is not always a number.
+
+### Deleted
+
+- Deleted method move_checker_to_house. Move checker just sets the destination to the house if the move is valid.
+
+## [0.1.9] - 10/10/25
+
+### Changed
+
+- Changed different aspects in tests/ in order to meet pylint expectations
+
+## [0.1.8] - 10/10/25
 
 ### Added
 
