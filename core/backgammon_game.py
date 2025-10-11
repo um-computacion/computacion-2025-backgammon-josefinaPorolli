@@ -61,6 +61,22 @@ class BackgammonGame:
         self.__turn__ = colour
 
     # This method does not receive any parameters.
+    # It sets the first turn of the game based on the dice rolls.
+    def set_first_turn(self):
+        """Sets the first turn of the game based on the dice rolls"""
+        first_roll = self.__dice1__.roll()
+        second_roll = self.__dice2__.roll()
+        while first_roll == second_roll:
+            first_roll = self.__dice1__.roll()
+            second_roll = self.__dice2__.roll()
+        # If the first dice is higher than the second, black starts.
+        # If the second dice is higher than the first, white starts.
+        if first_roll > second_roll:
+            self.set_turn("Black")
+        else:
+            self.set_turn("White")
+
+    # This method does not receive any parameters.
     # It checks if the 15 checkers of a player is in the house
     # If there are 15 checkers in one of the houses, it sets the winner.
     # It returns "None" (as string for preventing problems)
