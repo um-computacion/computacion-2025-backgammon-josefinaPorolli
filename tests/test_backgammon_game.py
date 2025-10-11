@@ -14,6 +14,12 @@ class TestBackgammonGame(unittest.TestCase):
         self.__game__.set_turn("White")
         self.assertEqual(self.__game__.get_turn(), "White")
 
+    def test_set_first_turn(self):
+        """Method for testing the first turn setter"""
+        self.__game__.set_first_turn()
+        # As it is random, we can only check that it is valid.
+        self.assertIn(self.__game__.get_turn(), ["Black", "White"])
+
     def test_set_default_checkers(self):
         """Method for testing default checkers setting"""
         self.__game__.set_default_checkers()
