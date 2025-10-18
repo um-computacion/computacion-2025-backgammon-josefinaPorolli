@@ -16,68 +16,91 @@ class BackgammonCLI:
         os.system('cls' if os.name == 'nt' else 'clear')
     
     def display_board(self):
-        """Board display"""
+        """Board display with compact representation for multiple checkers"""
         board = self.game.__board__.get_board()
         
         print("\n" + "="*80)
         print("BACKGAMMON BOARD".center(80))
         print("="*80)
         
-        # Top numbers (13-24)
-        print(" " * 10 + "13  14  15  16  17  18    19  20  21  22  23  24")
-        print(" " * 10 + "┌───┌───┌───┌───┌───┌───┐  ┌───┌───┌───┌───┌───┌───┐")
+        # TOP ROW: Points 13-24
+        print(" " * 10 + " 13  14  15  16  17  18     19  20  21  22  23  24")
+        print(" " * 10 + "╔═══╦═══╦═══╦═══╦═══╦═══╗  ╔═══╦═══╦═══╦═══╦═══╦═══╗")
         
-        # Display checkers for top row
-        for row in range(5):
+        # Para la fila superior - máximo 5 filas visibles
+        max_display_rows = 5
+        for row in range(max_display_rows):
             line = " " * 10
             for point in range(13, 25):
                 checkers = board[str(point)]
                 if len(checkers) > row:
-                    color_char = '○' if checkers[row].get_colour() == "Black" else '●'
-                    line += f"│ {color_char} "
+                    # Si es la última fila visible y hay más fichas ocultas, mostrar contador
+                    if row == max_display_rows - 1 and len(checkers) > max_display_rows:
+                        hidden_count = len(checkers) - max_display_rows + 1
+                        line += f"║x{hidden_count} "
+                    else:
+                        color_char = '○' if checkers[row].get_colour() == "Black" else '●'
+                        line += f"║ {color_char} "
                 else:
-                    line += "│   "
-            line += "│"
+                    line += "║   "
+                if point == 18:
+                    line += "║  "
+            line += "║"
             print(line)
         
-        print(" " * 10 + "└───└───└───└───└───└───┘  └───└───└───└───└───└───┘")
+        print(" " * 10 + "╚═══╩═══╩═══╩═══╩═══╩═══╝  ╚═══╩═══╩═══╩═══╩═══╩═══╝")
         
-        # Middle section with eaten checkers and houses
-        print(f"BEaten:{len(board['BEaten']):2d} " + "─" * 40 + f" WEaten:{len(board['WEaten']):2d}")
-        print(f"BHouse:{len(board['BHouse']):2d} " + "─" * 40 + f" WHouse:{len(board['WHouse']):2d}")
+        # Middle section
+        print(f"BEaten:{len(board['BEaten']):2d} " + "─" * 52 + f" WEaten:{len(board['WEaten']):2d}")
+        print(f"BHouse:{len(board['BHouse']):2d} " + "─" * 52 + f" WHouse:{len(board['WHouse']):2d}")
         
-        # Bottom numbers (12-1)
-        print(" " * 10 + "12  11  10   9   8   7     6   5   4   3   2   1")
-        print(" " * 10 + "┌───┌───┌───┌───┌───┌───┐  ┌───┌───┌───┌───┌───┌───┐")
+        # BOTTOM ROW: Points 12-1
+        print(" " * 10 + " 12  11  10   9   8   7      6   5   4   3   2   1")
+        print(" " * 10 + "╔═══╦═══╦═══╦═══╦═══╦═══╗  ╔═══╦═══╦═══╦═══╦═══╦═══╗")
         
-        # Display checkers for bottom row
-        for row in range(4, -1, -1):
+        # Para la fila inferior - máximo 5 filas visibles
+        for row in range(max_display_rows - 1, -1, -1):
             line = " " * 10
             for point in range(12, 0, -1):
                 checkers = board[str(point)]
                 if len(checkers) > row:
-                    color_char = '○' if checkers[row].get_colour() == "Black" else '●'
-                    line += f"│ {color_char} "
+                    # Si es la primera fila visible (row 4) y hay más fichas ocultas, mostrar contador
+                    if row == max_display_rows - 1 and len(checkers) > max_display_rows:
+                        hidden_count = len(checkers) - max_display_rows + 1
+                        line += f"║x{hidden_count} "
+                    else:
+                        color_char = '○' if checkers[row].get_colour() == "Black" else '●'
+                        line += f"║ {color_char} "
                 else:
-                    line += "│   "
-            line += "│"
+                    line += "║   "
+                if point == 7:
+                    line += "║  "
+            line += "║"
             print(line)
         
-        print(" " * 10 + "└───└───└───└───└───└───┘  └───└───└───└───└───└───┘")
+        print(" " * 10 + "╚═══╩═══╩═══╩═══╩═══╩═══╝  ╚═══╩═══╩═══╩═══╩═══╩═══╝")
         print("="*80)
+        print("Legend: ○ = Black, ● = White, xN = N additional checkers")
         
     def get_player_names(self):
         """Get player names from input"""
         print("Welcome to Backgammon!")
         print("="*30)
-        
-        black_name = input("Player with black checkers, enter your name: ")
-        white_name = input("Player with white checkers, enter your name: ")
-        
+        black_name = ""
+        white_name = ""
+        while black_name.strip() == "":
+            black_name = input("Player with black checkers ○, enter your name: ")
+            if black_name.strip() == "":
+                print("Name cannot be empty. Please enter a valid name.")
+        while white_name.strip() == "":
+            white_name = input("Player with white checkers ●, enter your name: ")
+            if white_name.strip() == "":
+                print("Name cannot be empty. Please enter a valid name.")
+
         # Set names using the player objects
         self.game.__player1__.set_name(black_name)
         self.game.__player2__.set_name(white_name)
-        
+
         return black_name, white_name
     
     def display_dice_roll(self):
@@ -92,14 +115,18 @@ class BackgammonCLI:
     
     def get_player_move(self, player_name, color, available_moves):
         """Get a move from the player"""
-        print(f"\n{player_name} ({color}), it's your turn!")
+        checker_char = '○' if color == "Black" else '●'
+        print(f"\n{player_name} ({color}  {checker_char}), it's your turn!")
         
         while True:
             try:
                 print("\nAvailable moves:", available_moves)
                 origin = input("Enter origin point (or 'BEaten'/'WEaten' for eaten checkers): ").strip()
                 steps = int(input("Enter number of steps: "))
-                
+                # Validate the steps
+                if steps not in available_moves:
+                    print("Invalid number of steps! Please choose from available moves.")
+                    continue
                 # Validate the move
                 if self.game.check_move(origin, steps):
                     return origin, steps
