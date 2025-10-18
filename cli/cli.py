@@ -122,6 +122,16 @@ class BackgammonCLI:
             try:
                 print("\nAvailable moves:", available_moves)
                 origin = input("Enter origin point (or 'BEaten'/'WEaten' for eaten checkers): ").strip()
+                # Validate the origin
+                if origin not in self.game.__board__.get_board().keys():
+                    print("Invalid origin! Please choose a valid point with your checkers.")
+                    continue
+                if len(self.game.__board__.get_checkers_in_field(origin)) == 0:
+                    print("No checkers in the chosen origin! Please choose a valid point.")
+                    continue
+                if self.game.__board__.get_checkers_in_field(origin)[0].get_colour() != color:
+                    print("You can only move your own checkers! Please choose a valid point.")
+                    continue
                 steps = int(input("Enter number of steps: "))
                 # Validate the steps
                 if steps not in available_moves:
@@ -145,7 +155,10 @@ class BackgammonCLI:
         
         dice1 = self.game.__dice1__.get_number()
         dice2 = self.game.__dice2__.get_number()
-        first_player = self.game.get_turn()
+        if self.game.get_turn() == "Black":
+            first_player = self.game.__player1__.get_name()
+        else:
+            first_player = self.game.__player2__.get_name()
         
         print(f"Black rolled: {dice1}, White rolled: {dice2}")
         print(f"{first_player} goes first!")
@@ -192,10 +205,7 @@ class BackgammonCLI:
                 moves = [dice1_val, dice2_val]
             
             # Execute moves
-            for move_steps in moves:
-                if move_steps == 0:  # Skip if move was already used
-                    continue
-                    
+            while moves:   
                 self.display_board()
                 print(f"\nRemaining moves: {moves}")
                 
@@ -205,8 +215,7 @@ class BackgammonCLI:
                 self.game.move_checker(origin, steps)
                 
                 # Remove this move from available moves
-                if steps in moves:
-                    moves[moves.index(steps)] = 0
+                moves.remove(steps)
             
             # Switch turn
             next_color = "White" if current_color == "Black" else "Black"
