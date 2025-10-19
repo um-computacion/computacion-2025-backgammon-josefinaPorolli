@@ -204,8 +204,45 @@ class BackgammonCLI:
             else:
                 moves = [dice1_val, dice2_val]
             
+            # VERIFICAR SI HAY AL MENOS UN MOVIMIENTO POSIBLE
+            has_valid_move = False
+            for steps in moves:
+                # Verificar si existe algún origen desde donde se pueda mover con estos steps
+                board = self.game.__board__.get_board()
+                for point in board.keys():
+                    # Verificar si el punto tiene fichas del jugador actual
+                    checkers = board[point]
+                    if checkers and checkers[0].get_colour() == current_color:
+                        if self.game.check_move(point, steps):
+                            has_valid_move = True
+                            break
+                if has_valid_move:
+                    break
+            
             # Execute moves
             while moves:   
+                # CHECK IF THERE IS AT LEAST ONE VALID MOVE LEFT AFTER EACH MOVE
+                has_valid_move = False
+                remaining_moves = set(moves)  # Unique moves left
+
+                for steps in remaining_moves:
+                    # Check if there is a source from which to move with these steps
+                    board = self.game.__board__.get_board()
+                    for point in board.keys():
+                        # Check if the point has the current player's checkers
+                        checkers = board[point]
+                        if checkers and checkers[0].get_colour() == current_color:
+                            if self.game.check_move(point, steps):
+                                has_valid_move = True
+                                break
+                    if has_valid_move:
+                        break
+                
+                if not has_valid_move:
+                    print(f"\n❌ {current_player} has no valid moves available with remaining dice {list(remaining_moves)}!")
+                    print("Skipping remaining moves...")
+                    break
+                
                 self.display_board()
                 print(f"\nRemaining moves: {moves}")
                 
