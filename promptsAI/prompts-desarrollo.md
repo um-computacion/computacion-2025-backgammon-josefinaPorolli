@@ -399,3 +399,289 @@ Lógica más clara
 Cada método ahora tiene una responsabilidad única y los returns están mejor organizados.
 
 ## Used with changes. Replaced each method for checking a move to the house with the suggested methods. Re-comemented in english and fixed some method names and descriptions.
+
+## 2. Deepseek
+## Prompt:
+Tengo estas clases y debo hacer una interfaz cli para poder jugar al dichoso backgammon pero no sé bien por dónde empezar. estos archivos están en una carpeta core/ y además (no dentro) de esa carpeta core/ hay una que se llama cli/ que tiene un __init__.py (por las dudas xd) y otro que se llama cli.py, que sería el archivo desde el cual el usuario jugará al juego.
+
+Necesito que me ayudes con el flujo que tengo en mente. Podemos ir por partes, simplemente ayudame a estructurar todo para que todo funcione correctamente y no me pierda en el proceso, ya que muchas de las cosas las voy a tener que obviamente poner yo, simplemente necesito como una especie de guía.
+
+El flujo que tengo en mente es el siguiente:
+1- El juego les pedirá a sus jugadores que pongan sus nombres o apodos de la siguiente manera:
+Player with black checkers, enter your name: (usará el setter de set_name de player.py para establecer el nombre del jugador que será Black)
+Player with white checkers, enter your name: (usará el setter de set_name de player.py para establecer el nombre del jugador que será White)
+2- El juego tirará los dados 1 y 2 con set_first_turn de backgammon game. Mostrará cuál es el número que les tocó a cada uno y acto seguido les dirá quién comienza. Seteará el turno en el que corresponda (también esa parte del flujo se hace con el método mencionado.)
+3- El juego limpiará la consola para tener una interfaz más cómoda y seteará las fichas con set_default_checkers.
+4- El juego mostrará el tablero con las fichas. quiero que los campos de eaten y house estén uno al lado del otro, correspondiéndose con el color de cada jugador, obviamente. Por arriba estaría toda la parte del negro y abajo del blanco. Además, recordá que las puntas van arrancando en 1 desde el blanco, yendo hacia la izquierda, luego hacia arriba y luego a la derecha, hasta el 24 del lado del negro. Necesito también ideas para presentar el tablero porque si hay algo muy estético se vuelve feaso cuando se mueven las fichas y todo, así que quiero algo más o menos simple pero que se entienda.
+4- El juego comienza. Se crea un bucle para que los jugadores puedan turnándose. Se le indica al jugador que le toca cuáles son sus dados lanzados y se le pide que elija una punta de origen y una cantidad de pasos dependiendo de los números de los dados para el primer paso. Luego hace lo mismo con el número que queda. Si ambos dados son iguales, se duplican, es decir, habría 4 dados que valgan lo mismo.
+5- El juego luego de cada vez que se mueve una ficha evalúa si hay algún ganador. Si no hay ninguno, el bucle sigue.
+
+creo que es eso por ahora xd
+(added all the files in core/ so that it could more or less get an idea about the general structure).
+
+## Answer
+¡Excelente! Tienes una estructura muy clara del flujo del juego. Vamos a organizar esto paso a paso. Te ayudo con la estructura del CLI y algunas sugerencias para la presentación del tablero.
+
+Estructura del CLI
+Primero, creemos el archivo cli/cli.py:
+
+python
+"""CLI module for Backgammon game"""
+import os
+from core.backgammon_game import BackgammonGame
+
+class BackgammonCLI:
+    """Command Line Interface for Backgammon game"""
+    
+    def __init__(self):
+        self.game = BackgammonGame()
+    
+    def clear_screen(self):
+        """Clear the terminal screen"""
+        os.system('cls' if os.name == 'nt' else 'clear')
+    
+    def display_board(self):
+        """Display the current state of the board"""
+        board = self.game._BackgammonGame__board__.get_board()
+        
+        print("\n" + "="*60)
+        print("BACKGAMMON BOARD")
+        print("="*60)
+        
+        # Display eaten checkers
+        print(f"\nEaten Checkers:")
+        print(f"Black Eaten: {len(board['BEaten'])} checkers")
+        print(f"White Eaten: {len(board['WEaten'])} checkers")
+        
+        # Display houses
+        print(f"\nHouses:")
+        print(f"Black House: {len(board['BHouse'])} checkers")
+        print(f"White House: {len(board['WHouse'])} checkers")
+        
+        print("\n" + "-"*60)
+        
+        # Display the main board points (1-24)
+        # Top row (points 13-24) - Black's side
+        print("\nBLACK'S SIDE (Points 13-24)")
+        top_row = ""
+        for point in range(13, 25):
+            checkers = board[str(point)]
+            checker_count = len(checkers)
+            color = checkers[0].get_colour() if checkers else " "
+            top_row += f"{point:2d}({color[0]}{checker_count}) "
+        print(top_row)
+        
+        # Middle separator
+        print("\n" + "-"*60)
+        
+        # Bottom row (points 12-1) - White's side
+        print("\nWHITE'S SIDE (Points 12-1)")
+        bottom_row = ""
+        for point in range(12, 0, -1):
+            checkers = board[str(point)]
+            checker_count = len(checkers)
+            color = checkers[0].get_colour() if checkers else " "
+            bottom_row += f"{point:2d}({color[0]}{checker_count}) "
+        print(bottom_row)
+        
+        print("-"*60)
+    
+    def get_player_names(self):
+        """Get player names from input"""
+        print("Welcome to Backgammon!")
+        print("="*30)
+        
+        black_name = input("Player with black checkers, enter your name: ")
+        white_name = input("Player with white checkers, enter your name: ")
+        
+        # Set names using the player objects
+        self.game._BackgammonGame__player1__.set_name(black_name)
+        self.game._BackgammonGame__player2__.set_name(white_name)
+        
+        return black_name, white_name
+    
+    def display_dice_roll(self):
+        """Display dice roll results"""
+        dice1 = self.game._BackgammonGame__dice1__.get_number()
+        dice2 = self.game._BackgammonGame__dice2__.get_number()
+        
+        print(f"\nDice Roll: {dice1} and {dice2}")
+        
+        if dice1 == dice2:
+            print("DOUBLES! You have 4 moves of the same value.")
+    
+    def get_player_move(self, player_name, color, available_moves):
+        """Get a move from the player"""
+        print(f"\n{player_name} ({color}), it's your turn!")
+        
+        while True:
+            try:
+                print("\nAvailable moves:", available_moves)
+                origin = input("Enter origin point (or 'BEaten'/'WEaten' for eaten checkers): ").strip()
+                steps = int(input("Enter number of steps: "))
+                
+                # Validate the move
+                if self.game.check_move(origin, steps):
+                    return origin, steps
+                else:
+                    print("Invalid move! Please try again.")
+                    
+            except ValueError:
+                print("Please enter valid input!")
+            except Exception as e:
+                print(f"Error: {e}. Please try again.")
+    
+    def determine_first_turn(self):
+        """Determine who goes first"""
+        print("\nDetermining who goes first...")
+        self.game.set_first_turn()
+        
+        dice1 = self.game._BackgammonGame__dice1__.get_number()
+        dice2 = self.game._BackgammonGame__dice2__.get_number()
+        first_player = self.game.get_turn()
+        
+        print(f"Black rolled: {dice1}, White rolled: {dice2}")
+        print(f"{first_player} goes first!")
+        
+        input("\nPress Enter to continue...")
+    
+    def play_game(self):
+        """Main game loop"""
+        # Setup
+        black_name, white_name = self.get_player_names()
+        self.clear_screen()
+        self.determine_first_turn()
+        self.game.set_default_checkers()
+        
+        # Main game loop
+        while True:
+            self.clear_screen()
+            self.display_board()
+            
+            # Check for winner
+            winner = self.game.check_winner()
+            if winner != "None":
+                winner_name = black_name if winner == "Black" else white_name
+                print(f"\n🎉 CONGRATULATIONS! {winner_name} ({winner}) WINS! 🎉")
+                break
+            
+            # Get current player info
+            current_color = self.game.get_turn()
+            current_player = black_name if current_color == "Black" else white_name
+            
+            # Roll dice for current turn
+            dice1_val = self.game._BackgammonGame__dice1__.roll()
+            dice2_val = self.game._BackgammonGame__dice2__.roll()
+            
+            print(f"\n{current_player}'s turn ({current_color})")
+            self.display_dice_roll()
+            
+            # Handle moves based on dice
+            moves = []
+            if dice1_val == dice2_val:
+                # Doubles - 4 moves
+                moves = [dice1_val] * 4
+            else:
+                moves = [dice1_val, dice2_val]
+            
+            # Execute moves
+            for move_steps in moves:
+                if move_steps == 0:  # Skip if move was already used
+                    continue
+                    
+                self.display_board()
+                print(f"\nRemaining moves: {moves}")
+                
+                origin, steps = self.get_player_move(current_player, current_color, moves)
+                
+                # Execute the move
+                self.game.move_checker(origin, steps)
+                
+                # Remove this move from available moves
+                if steps in moves:
+                    moves[moves.index(steps)] = 0
+            
+            # Switch turn
+            next_color = "White" if current_color == "Black" else "Black"
+            self.game.set_turn(next_color)
+            
+            input("\nPress Enter to continue to next turn...")
+
+def main():
+    """Main function to start the game"""
+    try:
+        cli = BackgammonCLI()
+        cli.play_game()
+    except KeyboardInterrupt:
+        print("\n\nGame interrupted. Thanks for playing!")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
+Sugerencias para mejorar la presentación
+Para el tablero, te sugiero esta representación más visual:
+
+python
+def display_enhanced_board(self):
+    """Enhanced board display"""
+    board = self.game._BackgammonGame__board__.get_board()
+    
+    print("\n" + "="*80)
+    print("BACKGAMMON BOARD".center(80))
+    print("="*80)
+    
+    # Top numbers (13-24)
+    print(" " * 10 + "13  14  15  16  17  18    19  20  21  22  23  24")
+    print(" " * 10 + "┌───┌───┌───┌───┌───┌───┐  ┌───┌───┌───┌───┌───┌───┐")
+    
+    # Display checkers for top row
+    for row in range(5):
+        line = " " * 10
+        for point in range(13, 25):
+            checkers = board[str(point)]
+            if len(checkers) > row:
+                color_char = 'B' if checkers[row].get_colour() == "Black" else 'W'
+                line += f"│ {color_char} "
+            else:
+                line += "│   "
+        line += "│"
+        print(line)
+    
+    print(" " * 10 + "└───└───└───└───└───└───┘  └───└───└───└───└───└───┘")
+    
+    # Middle section with eaten checkers and houses
+    print(f"BEaten:{len(board['BEaten']):2d} " + "─" * 40 + f" WEaten:{len(board['WEaten']):2d}")
+    print(f"BHouse:{len(board['BHouse']):2d} " + "─" * 40 + f" WHouse:{len(board['WHouse']):2d}")
+    
+    # Bottom numbers (12-1)
+    print(" " * 10 + "12  11  10   9   8   7     6   5   4   3   2   1")
+    print(" " * 10 + "┌───┌───┌───┌───┌───┌───┐  ┌───┌───┌───┌───┌───┌───┐")
+    
+    # Display checkers for bottom row
+    for row in range(4, -1, -1):
+        line = " " * 10
+        for point in range(12, 0, -1):
+            checkers = board[str(point)]
+            if len(checkers) > row:
+                color_char = 'B' if checkers[row].get_colour() == "Black" else 'W'
+                line += f"│ {color_char} "
+            else:
+                line += "│   "
+        line += "│"
+        print(line)
+    
+    print(" " * 10 + "└───└───└───└───└───└───┘  └───└───└───└───└───└───┘")
+    print("="*80)
+Próximos pasos sugeridos:
+Empieza con la versión simple del tablero que te proporcioné primero
+
+Prueba el flujo básico y asegúrate de que los movimientos funcionen
+
+Mejora gradualmente la interfaz con la versión enhanced
+
+Añade validaciones extra según vayas encontrando edge cases
+
+¿Quieres que empecemos con alguna parte específica o tienes preguntas sobre algún componente del flujo?
+
+## Used with changes in cli.py. Although of course it did not work at the beginning, i use it as a general guide for developing the CLI interface. Will add validations, fixes and adapt it to my own project.

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 18/10/25
+
+### Changed
+
+- Finished mechanism in CLI. The validation for when there are absolutely no moves that can be made, is now evaluated after each move and not just after changing turns.
+
+## [1.0.2] - 18/10/25
+
+### Changed
+
+- Upgraded CLI interface. When the first turn is set, it shows the actual player's name. Added validations for when the origin put by the player is not valid.
+
+## [1.0.1] - 18/10/25
+
+### Changed
+
+- Upgraded CLI interface. Fixed the display of the board, changed the colour of the representation of the checkers (now it has to be used in a dark mode console), added validations for invalid inputs of steps.
+
+## [1.0.0] - 13/10/25
+
+### Added
+
+- CLI interface for playing. It is far from working the way it should because I used an AI response as a guide for it.
+
 ## [0.1.11] - 11/10/25
 
 ### Added
