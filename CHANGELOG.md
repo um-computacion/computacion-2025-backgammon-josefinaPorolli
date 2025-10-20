@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 19/10/25
+
+### Added
+
+- Added a primitive AI generated pygame interface as what will be a guide, as I have never in my life used pygame so I need at least something to start with :/
+
 ## [1.0.3] - 18/10/25
 
 ### Changed
