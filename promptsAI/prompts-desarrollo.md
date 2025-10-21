@@ -1032,3 +1032,202 @@ Puedes mejorar la interfaz añadiendo animaciones, sonidos y más detalles visua
 ¿Te gustaría que expanda alguna parte específica del código o que añada alguna característica en particular?
 
 ## Used as a basic guide for game_interface.py. Works horribly :D
+
+## DEEPSEEK (one chat)
+## Prompt:
+Haceme un código en pygame que sea una pantalla totalmente en blanco, de resolución 2180x720
+## Answer:
+Te ayudo a crear un código en Pygame que muestre una pantalla completamente en blanco con la resolución 2180x720:
+
+python
+import pygame
+import sys
+
+# Inicializar Pygame
+pygame.init()
+
+# Definir la resolución
+ANCHO = 2180
+ALTO = 720
+
+# Crear la ventana
+pantalla = pygame.display.set_mode((ANCHO, ALTO))
+pygame.display.set_caption("Pantalla Blanca - 2180x720")
+
+# Color blanco
+BLANCO = (255, 255, 255)
+
+# Bucle principal del juego
+ejecutando = True
+while ejecutando:
+    # Manejar eventos
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            ejecutando = False
+        # Salir también con la tecla ESC
+        elif evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_ESCAPE:
+                ejecutando = False
+    
+    # Rellenar la pantalla con color blanco
+    pantalla.fill(BLANCO)
+    
+    # Actualizar la pantalla
+    pygame.display.flip()
+
+# Salir de Pygame
+pygame.quit()
+sys.exit()
+Características del código:
+
+Resolución: 2180x720 píxeles exactamente
+
+Color de fondo: Blanco puro (RGB: 255, 255, 255)
+
+Funcionalidades:
+
+Se cierra haciendo clic en la X de la ventana
+
+También se cierra presionando la tecla ESC
+
+Título de ventana descriptivo
+
+Para ejecutar el código necesitas:
+
+Tener Pygame instalado (pip install pygame)
+
+Guardar el código en un archivo .py
+
+Ejecutarlo con Python
+
+Nota: Si tu monitor no soporta la resolución 2180x720, Pygame podría ajustar automáticamente el tamaño de la ventana o mostrar barras negras. La resolución 2180x720 es bastante ancha, así que asegúrate de que tu monitor pueda mostrarla correctamente.
+
+## Prompt:
+
+Bien, ahora dividime ese cuadrante de forma que tenga un margen de 5 pixeles. Ahora, dentro de ese margen, dividí la imagen en 2 de tal forma que el cuadrante izquierdo ocupe dos tercios de la pantalla y que la parte de la derecha ocupe el otro tercio. Por último, la parte más pequeña dividila en 2, tal que tenga un mini cuadrante arriba y otro abajo
+
+## Answer:
+Te ayudo a modificar el código para crear la estructura que describes. Aquí está el código completo:
+
+python
+import pygame
+import sys
+
+# Inicializar Pygame
+pygame.init()
+
+# Definir la resolución
+ANCHO = 2180
+ALTO = 720
+
+# Crear la ventana
+pantalla = pygame.display.set_mode((ANCHO, ALTO))
+pygame.display.set_caption("Pantalla Dividida - 2180x720")
+
+# Colores
+BLANCO = (255, 255, 255)
+NEGRO = (0, 0, 0)
+ROJO = (255, 0, 0)
+VERDE = (0, 255, 0)
+AZUL = (0, 0, 255)
+
+# Márgenes
+MARGEN = 5
+
+# Bucle principal del juego
+ejecutando = True
+while ejecutando:
+    # Manejar eventos
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            ejecutando = False
+        # Salir también con la tecla ESC
+        elif evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_ESCAPE:
+                ejecutando = False
+    
+    # Rellenar toda la pantalla con color blanco
+    pantalla.fill(BLANCO)
+    
+    # Calcular áreas con márgenes
+    # Área total con margen
+    area_total = pygame.Rect(MARGEN, MARGEN, ANCHO - 2*MARGEN, ALTO - 2*MARGEN)
+    
+    # Dividir en izquierda (2/3) y derecha (1/3)
+    ancho_izquierda = (ANCHO - 2*MARGEN) * 2 // 3
+    ancho_derecha = (ANCHO - 2*MARGEN) - ancho_izquierda
+    
+    # Cuadrante izquierdo (2/3 del ancho)
+    cuadrante_izquierdo = pygame.Rect(
+        MARGEN, 
+        MARGEN, 
+        ancho_izquierda, 
+        ALTO - 2*MARGEN
+    )
+    
+    # Cuadrante derecho (1/3 del ancho)
+    cuadrante_derecho = pygame.Rect(
+        MARGEN + ancho_izquierda, 
+        MARGEN, 
+        ancho_derecha, 
+        ALTO - 2*MARGEN
+    )
+    
+    # Dividir el cuadrante derecho en 2 partes iguales (arriba y abajo)
+    alto_mini_cuadrante = (ALTO - 2*MARGEN) // 2
+    
+    # Mini cuadrante superior derecho
+    mini_superior = pygame.Rect(
+        MARGEN + ancho_izquierda, 
+        MARGEN, 
+        ancho_derecha, 
+        alto_mini_cuadrante
+    )
+    
+    # Mini cuadrante inferior derecho
+    mini_inferior = pygame.Rect(
+        MARGEN + ancho_izquierda, 
+        MARGEN + alto_mini_cuadrante, 
+        ancho_derecha, 
+        alto_mini_cuadrante
+    )
+    
+    # Dibujar los cuadrantes con diferentes colores para visualización
+    pygame.draw.rect(pantalla, (200, 200, 255), cuadrante_izquierdo)  # Azul claro
+    pygame.draw.rect(pantalla, (255, 200, 200), mini_superior)        # Rojo claro
+    pygame.draw.rect(pantalla, (200, 255, 200), mini_inferior)        # Verde claro
+    
+    # Dibujar bordes para mejor visualización
+    pygame.draw.rect(pantalla, NEGRO, cuadrante_izquierdo, 2)
+    pygame.draw.rect(pantalla, NEGRO, mini_superior, 2)
+    pygame.draw.rect(pantalla, NEGRO, mini_inferior, 2)
+    
+    # Actualizar la pantalla
+    pygame.display.flip()
+
+# Salir de Pygame
+pygame.quit()
+sys.exit()
+Estructura creada:
+
+Margen general: 5 píxeles alrededor de toda la pantalla
+
+Cuadrante izquierdo: Ocupa 2/3 del ancho disponible (después del margen)
+
+Cuadrante derecho: Ocupa 1/3 del ancho disponible, dividido en:
+
+Mini cuadrante superior: Mitad superior del área derecha
+
+Mini cuadrante inferior: Mitad inferior del área derecha
+
+Características visuales:
+
+Cada área tiene un color diferente para distinguirlas fácilmente
+
+Bordes negros alrededor de cada cuadrante para mejor definición
+
+Los márgenes se mantienen blancos como solicitaste
+
+Si quieres que todas las áreas sean blancas (solo con los bordes para ver la división), simplemente cambia los colores de relleno a BLANCO en las líneas donde se dibujan los rectángulos.
+
+## Used with modifications. Started from 0 the pygame interface to have a more guided and controlled code and conversation, so I can keep on going by myself with most of what's remaining.
