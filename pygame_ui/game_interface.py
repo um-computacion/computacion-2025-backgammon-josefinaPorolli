@@ -92,6 +92,119 @@ while running:
     pygame.draw.rect(screen, BLACK, black_player_control, 2)
     pygame.draw.rect(screen, BLACK, white_player_control, 2)
 
+    # BACKGAMMON BOARD
+    board_margin = 20  # Margen interno del tablero
+    board_inner = pygame.Rect(
+        board_square.left + board_margin,
+        board_square.top + board_margin,
+        board_square.width - 2 * board_margin,
+        board_square.height - 2 * board_margin
+    )
+
+    # Divide the board in the middle to differ left and right squares
+    board_center_x = board_inner.left + board_inner.width // 2
+    
+    # Create the 24 points (triangles)
+    point_width = board_inner.width // 12  # Width
+    point_height = board_inner.height // 2  # Height
+
+    # Font for numbers of each point
+    font = pygame.font.SysFont('Arial', 14, bold=True)
+
+    # Draw points and numbers
+
+    # Upper left quadrant (points 13-18) - pointing DOWN
+    for i in range(6):
+        point_number = 13 + i
+        point_rect = pygame.Rect(
+            board_inner.left + i * point_width,
+            board_inner.top,
+            point_width,
+            point_height
+        )
+        color = POINT1_COLOR if i % 2 == 0 else POINT2_COLOR
+        # Triangle pointing down
+        pygame.draw.polygon(screen, color, [
+            (point_rect.left, point_rect.top),
+            (point_rect.right, point_rect.top),
+            (point_rect.left + point_rect.width // 2, point_rect.bottom)
+        ])
+        # Numbers above the points
+        number_text = font.render(str(point_number), True, BLACK)
+        text_rect = number_text.get_rect(center=(point_rect.centerx, board_inner.top - 10))
+        screen.blit(number_text, text_rect)
+
+    # Upper right quadrant (points 19-24) - pointing DOWN
+    for i in range(6):
+        point_number = 19 + i
+        point_rect = pygame.Rect(
+            board_center_x + i * point_width,
+            board_inner.top,
+            point_width - 2,
+            point_height
+        )
+        color = POINT1_COLOR if i % 2 == 0 else POINT2_COLOR
+        # Triangle pointing down
+        pygame.draw.polygon(screen, color, [
+            (point_rect.left, point_rect.top),
+            (point_rect.right, point_rect.top),
+            (point_rect.left + point_rect.width // 2, point_rect.bottom)
+        ])
+        # Numbers above the points
+        number_text = font.render(str(point_number), True, BLACK)
+        text_rect = number_text.get_rect(center=(point_rect.centerx, board_inner.top - 10))
+        screen.blit(number_text, text_rect)
+
+    # Lower left quadrant (points 12-7) - pointing UP
+    for i in range(6):
+        point_number = 12 - i
+        point_rect = pygame.Rect(
+            board_inner.left + i * point_width,
+            board_inner.top + board_inner.height // 2,
+            point_width - 2,
+            point_height
+        )
+        color = POINT2_COLOR if i % 2 == 0 else POINT1_COLOR
+        # Triangle pointing UP
+        pygame.draw.polygon(screen, color, [
+            (point_rect.left, point_rect.bottom),
+            (point_rect.right, point_rect.bottom),
+            (point_rect.left + point_rect.width // 2, point_rect.top)
+        ])
+        # Numbers below the points
+        number_text = font.render(str(point_number), True, BLACK)
+        text_rect = number_text.get_rect(center=(point_rect.centerx, board_inner.bottom + 10))
+        screen.blit(number_text, text_rect)
+
+    # Lower right quadrant (points 6-1) - pointing UP
+    for i in range(6):
+        point_number = 6 - i
+        point_rect = pygame.Rect(
+            board_center_x + i * point_width,
+            board_inner.top + board_inner.height // 2,
+            point_width - 2,
+            point_height
+        )
+        color = POINT2_COLOR if i % 2 == 0 else POINT1_COLOR
+        # Triangle pointing UP
+        pygame.draw.polygon(screen, color, [
+            (point_rect.left, point_rect.bottom),
+            (point_rect.right, point_rect.bottom),
+            (point_rect.left + point_rect.width // 2, point_rect.top)
+        ])
+        # Numbers below the points
+        number_text = font.render(str(point_number), True, BLACK)
+        text_rect = number_text.get_rect(center=(point_rect.centerx, board_inner.bottom + 10))
+        screen.blit(number_text, text_rect)
+
+    # Soft center line
+    pygame.draw.line(screen, BLACK, 
+                    (board_center_x, board_inner.top), 
+                    (board_center_x, board_inner.bottom), 2)
+
+    # Inner board border
+    pygame.draw.rect(screen, BLACK, board_inner, 1)
+
     # Update the screen
     pygame.display.flip()
 
