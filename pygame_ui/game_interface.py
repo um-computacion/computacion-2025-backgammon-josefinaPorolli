@@ -205,6 +205,41 @@ while running:
     # Inner board border
     pygame.draw.rect(screen, BLACK, board_inner, 1)
 
+    # SQUARES FOR CONTROLS IN THE RIGHT SQUARE
+    font = pygame.font.SysFont('Arial', 26, bold=True) # Set the font
+
+    # Black player control
+    black_text = font.render("BLACK PLAYER", True, WHITE)
+    black_text_rect = black_text.get_rect(centerx=black_player_control.centerx, top=black_player_control.top + 10)
+    screen.blit(black_text, black_text_rect)
+
+    font = pygame.font.SysFont('Arial', 20, bold=True) # Set the font
+
+    black_eaten_text = font.render("EATEN CHECKERS: ", True, WHITE)
+    black_eaten_text_rect = black_eaten_text.get_rect(centerx=black_player_control.left + 120, top=black_player_control.top + 60)
+    screen.blit(black_eaten_text, black_eaten_text_rect)
+
+    black_eaten_text = font.render("HOUSE: ", True, WHITE)
+    black_eaten_text_rect = black_eaten_text.get_rect(centerx=black_player_control.left + 120, top=black_player_control.top + 100)
+    screen.blit(black_eaten_text, black_eaten_text_rect)
+
+    font = pygame.font.SysFont('Arial', 26, bold=True) # Set the font
+    
+    # White player control
+    white_text = font.render("WHITE PLAYER", True, WHITE)
+    white_text_rect = white_text.get_rect(centerx=white_player_control.centerx, top=white_player_control.top + 10)
+    screen.blit(white_text, white_text_rect)
+
+    font = pygame.font.SysFont('Arial', 20, bold=True) # Set the font
+
+    white_eaten_text = font.render("EATEN CHECKERS: ", True, WHITE)
+    white_eaten_text_rect = white_eaten_text.get_rect(centerx=white_player_control.left + 120, top=white_player_control.top + 60)
+    screen.blit(white_eaten_text, white_eaten_text_rect)
+
+    white_house_text = font.render("HOUSE: ", True, WHITE)
+    white_house_text_rect = white_house_text.get_rect(centerx=white_player_control.left + 120, top=white_player_control.top + 100)
+    screen.blit(white_house_text, white_house_text_rect)
+
     # Update the screen
     pygame.display.flip()
 
