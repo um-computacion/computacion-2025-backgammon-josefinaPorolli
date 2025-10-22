@@ -1,5 +1,13 @@
 import pygame
 import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from core.backgammon_game import BackgammonGame
+
+game = BackgammonGame() # Define the game
+game.set_default_checkers() # Set the default positions of the checkers
 
 # Initialize Pygame
 pygame.init()
@@ -24,18 +32,137 @@ WHITE = (255, 255, 255)
 # Margins
 MARGIN = 5
 
-# Main game loop
-running = True
-while running:
-    # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        # Exit also with esc
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
+def create_point_mapping(board_inner_rect, point_width, point_height):
+    """Crea un diccionario que mapea puntos del board a coordenadas visuales"""
+    point_mapping = {}
+    board_inner = board_inner_rect
     
+    # Puntos 13-18 (superior izquierda)
+    for i in range(6):
+        point_number = 13 + i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + i * point_width,
+                board_inner.top,
+                point_width,
+                point_height
+            ),
+            "direction": "down"
+        }
+    
+    # Puntos 19-24 (superior derecha)
+    for i in range(6):
+        point_number = 19 + i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + board_inner.width // 2 + i * point_width,
+                board_inner.top,
+                point_width,
+                point_height
+            ),
+            "direction": "down"
+        }
+    
+    # Puntos 12-7 (inferior izquierda)
+    for i in range(6):
+        point_number = 12 - i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + i * point_width,
+                board_inner.top + board_inner.height // 2,
+                point_width,
+                point_height
+            ),
+            "direction": "up"
+        }
+    
+    # Puntos 6-1 (inferior derecha)
+    for i in range(6):
+        point_number = 6 - i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + board_inner.width // 2 + i * point_width,
+                board_inner.top + board_inner.height // 2,
+                point_width,
+                point_height
+            ),
+            "direction": "up"
+        }
+    
+    return point_mapping
+
+def draw_checkers_on_point(screen, point_data, checkers, max_display=5):
+    """Draws all the checkers in a specific point"""
+    point_rect = point_data["rect"]
+    direction = point_data["direction"]
+    
+    checker_radius = min(point_rect.width, 20)
+    spacing = checker_radius * 2
+    
+    # Determine direction (will start up in the upper squares and down in the lower ones)
+    if direction == "down":
+        start_y = point_rect.top + checker_radius
+        step = spacing
+    else:  # up
+        start_y = point_rect.bottom - checker_radius
+        step = -spacing
+    
+    # Draw checkers according to the max display
+    for i, checker in enumerate(checkers[:max_display]):
+        color = BLACK_CHECKER_COLOR if checker.get_colour() == "Black" else WHITE_CHECKER_COLOR
+        y_pos = start_y + i * step
+        
+        pygame.draw.circle(screen, color, (point_rect.centerx, y_pos), checker_radius)
+        # Borders
+        border_color = WHITE if checker.get_colour() == "Black" else BLACK
+        pygame.draw.circle(screen, border_color, (point_rect.centerx, y_pos), checker_radius, 1)
+    
+    # Show counter if necessary
+    if len(checkers) > max_display:
+        font = pygame.font.SysFont('Arial', 20, bold=True)
+        count_text = font.render(f"+{len(checkers) - max_display}", True, WHITE)
+        text_rect = count_text.get_rect(center=(point_rect.centerx, start_y + max_display * step))
+        screen.blit(count_text, text_rect)
+
+def draw_checkers_in_area(screen, area, checkers):
+    """Draws the checkers in the House and Eaten fields"""
+    if not checkers:
+        return
+    
+    checker_radius = min(area.height // 2 - 2, 10)
+    overlap_offset = checker_radius
+    
+    # Calculate the max number of checkers that fit
+    effective_width = checker_radius * 2 - overlap_offset
+    max_per_row = max(1, (area.width - checker_radius) // effective_width)
+    
+    for i, checker in enumerate(checkers):
+        row = i // max_per_row
+        col = i % max_per_row
+        
+        # Overlap
+        x = area.left + checker_radius + col * effective_width
+        y = area.top + area.height // 2
+        y += row * (checker_radius // 2)
+        
+        # Make sure it does not go off the area
+        if y + checker_radius > area.bottom:
+            # If it does not fit, make them smaller
+            checker_radius = 8
+            effective_width = checker_radius * 2 - overlap_offset
+            max_per_row = max(1, (area.width - checker_radius) // effective_width)
+            # Recalculate with new size
+            row = i // max_per_row
+            col = i % max_per_row
+            x = area.left + checker_radius + col * effective_width
+            y = area.top + area.height // 2 + row * (checker_radius // 2)
+            
+        color = BLACK_CHECKER_COLOR if checker.get_colour() == "Black" else WHITE_CHECKER_COLOR
+        pygame.draw.circle(screen, color, (int(x), int(y)), checker_radius)
+        border_color = WHITE if checker.get_colour() == "Black" else BLACK
+        pygame.draw.circle(screen, border_color, (int(x), int(y)), checker_radius, 1)
+
+def draw_general_interface():
     # Fill the background
     screen.fill(BACKGROUND_COLOR)
     
@@ -239,6 +366,73 @@ while running:
     white_house_text = font.render("HOUSE: ", True, WHITE)
     white_house_text_rect = white_house_text.get_rect(centerx=white_player_control.left + 120, top=white_player_control.top + 100)
     screen.blit(white_house_text, white_house_text_rect)
+
+    # Map all the points in the board related to __board__ points
+    point_mapping = create_point_mapping(board_inner, point_width, point_height)
+
+    # Draw the checkers
+    board_state = game.__board__.get_board()
+
+    for point_num, point_data in point_mapping.items():
+        checkers_in_point = board_state.get(point_num, [])
+        if checkers_in_point:
+            draw_checkers_on_point(screen, point_data, checkers_in_point)
+
+    # Areas for Black player
+    black_eaten_area = pygame.Rect(
+        black_player_control.left + 220,
+        black_player_control.top + 60,
+        black_player_control.width - 250,
+        30
+    )
+
+    black_house_area = pygame.Rect(
+        black_player_control.left + 220,
+        black_player_control.top + 100,
+        black_player_control.width - 250,
+        30
+    )
+
+    # Areas for black player  
+    white_eaten_area = pygame.Rect(
+        white_player_control.left + 220,
+        white_player_control.top + 60,
+        white_player_control.width - 250,
+        30
+    )
+
+    white_house_area = pygame.Rect(
+        white_player_control.left + 220,
+        white_player_control.top + 100,
+        white_player_control.width - 250,
+        30
+    )
+
+    # Draw special areas (Eaten and House)
+    pygame.draw.rect(screen, (50, 50, 50), black_eaten_area, 2)
+    pygame.draw.rect(screen, (50, 50, 50), black_house_area, 2)
+    pygame.draw.rect(screen, (50, 50, 50), white_eaten_area, 2)  
+    pygame.draw.rect(screen, (50, 50, 50), white_house_area, 2)
+
+    # Draw checkers in special areas.
+    draw_checkers_in_area(screen, black_eaten_area, board_state.get("BEaten", []))
+    draw_checkers_in_area(screen, black_house_area, board_state.get("BHouse", []))
+    draw_checkers_in_area(screen, white_eaten_area, board_state.get("WEaten", []))
+    draw_checkers_in_area(screen, white_house_area, board_state.get("WHouse", []))
+
+# Main game loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        # Exit also with esc
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+    
+    draw_general_interface()
 
     # Update the screen
     pygame.display.flip()
