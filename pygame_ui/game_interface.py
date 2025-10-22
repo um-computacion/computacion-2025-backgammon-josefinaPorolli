@@ -1,6 +1,7 @@
 import pygame
 import sys
 import os
+import random
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -31,6 +32,231 @@ WHITE = (255, 255, 255)
 
 # Margins
 MARGIN = 5
+
+def get_player_names():
+    """Obtains the players' names at the beginning of the game"""
+    # Fonts
+    title_font = pygame.font.SysFont('Arial', 48, bold=True)
+    input_font = pygame.font.SysFont('Arial', 36)
+    prompt_font = pygame.font.SysFont('Arial', 32)
+    
+    black_name = ""
+    white_name = ""
+    current_input = "black"  # 'black' or 'white'
+    
+    input_active = True
+    while input_active:
+        screen.fill(BACKGROUND_COLOR)
+        
+        # Title
+        title_text = title_font.render("BACKGAMMON", True, WHITE)
+        title_rect = title_text.get_rect(center=(WIDTH//2, 100))
+        screen.blit(title_text, title_rect)
+        
+        # Instructions
+        if current_input == "black":
+            prompt_text = prompt_font.render("Player with BLACK checkers, enter your name:", True, WHITE)
+        else:
+            prompt_text = prompt_font.render("Player with WHITE checkers, enter your name:", True, WHITE)
+        
+        prompt_rect = prompt_text.get_rect(center=(WIDTH//2, 250))
+        screen.blit(prompt_text, prompt_rect)
+        
+        # Show names
+        black_display = f"BLACK: {black_name}" if black_name else "BLACK: "
+        white_display = f"WHITE: {white_name}" if white_name else "WHITE: "
+        
+        black_text = input_font.render(black_display, True, WHITE)
+        white_text = input_font.render(white_display, True, WHITE)
+        
+        screen.blit(black_text, (WIDTH//2 - 200, 320))
+        screen.blit(white_text, (WIDTH//2 - 200, 370))
+        
+        # Current input
+        current_name = black_name if current_input == "black" else white_name
+        input_text = input_font.render(current_name + "|", True, (255, 255, 0))  # Yellow cursor
+        input_rect = input_text.get_rect(center=(WIDTH//2, 450))
+        screen.blit(input_text, input_rect)
+        
+        # Instructions
+        inst_text = prompt_font.render("Press ENTER to confirm, ESC to exit", True, (200, 200, 200))
+        inst_rect = inst_text.get_rect(center=(WIDTH//2, 550))
+        screen.blit(inst_text, inst_rect)
+        
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                elif event.key == pygame.K_RETURN:
+                    if current_input == "black" and black_name.strip():
+                        current_input = "white"
+                    elif current_input == "white" and white_name.strip():
+                        input_active = False
+                    elif current_input == "white" and not white_name.strip():
+                        # No permitir nombre vacío
+                        continue
+                elif event.key == pygame.K_BACKSPACE:
+                    if current_input == "black":
+                        black_name = black_name[:-1]
+                    else:
+                        white_name = white_name[:-1]
+                else:
+                    # Solo permitir caracteres alfanuméricos y espacios
+                    if event.unicode.isprintable() and len(event.unicode.strip()) > 0:
+                        if current_input == "black":
+                            black_name += event.unicode
+                        else:
+                            white_name += event.unicode
+    
+    return black_name, white_name
+
+def draw_dice(screen, rect, value):
+    """Draws the dice"""
+    # Background
+    pygame.draw.rect(screen, WHITE, rect, border_radius=12)
+    pygame.draw.rect(screen, BLACK, rect, 2, border_radius=12)
+    
+    dot_radius = rect.width // 15
+    dot_color = BLACK
+    
+    # Realtive positions
+    center_x, center_y = rect.center
+    third_x = rect.width // 3
+    third_y = rect.height // 3
+    
+    # Possible positions
+    positions = {
+        1: [(center_x, center_y)],
+        2: [(rect.left + third_x, rect.top + third_y), 
+            (rect.right - third_x, rect.bottom - third_y)],
+        3: [(rect.left + third_x, rect.top + third_y),
+            (center_x, center_y),
+            (rect.right - third_x, rect.bottom - third_y)],
+        4: [(rect.left + third_x, rect.top + third_y),
+            (rect.right - third_x, rect.top + third_y),
+            (rect.left + third_x, rect.bottom - third_y),
+            (rect.right - third_x, rect.bottom - third_y)],
+        5: [(rect.left + third_x, rect.top + third_y),
+            (rect.right - third_x, rect.top + third_y),
+            (center_x, center_y),
+            (rect.left + third_x, rect.bottom - third_y),
+            (rect.right - third_x, rect.bottom - third_y)],
+        6: [(rect.left + third_x, rect.top + third_y),
+            (rect.right - third_x, rect.top + third_y),
+            (rect.left + third_x, center_y),
+            (rect.right - third_x, center_y),
+            (rect.left + third_x, rect.bottom - third_y),
+            (rect.right - third_x, rect.bottom - third_y)]
+    }
+    
+    # Draw the points
+    for pos in positions[value]:
+        pygame.draw.circle(screen, dot_color, pos, dot_radius)
+
+def determine_first_turn(black_name, white_name):
+    """Creates a window for setting the first turn"""
+    temp_game = BackgammonGame()
+    
+    # Fonts
+    title_font = pygame.font.SysFont('Arial', 48, bold=True)
+    name_font = pygame.font.SysFont('Arial', 32, bold=True)
+    result_font = pygame.font.SysFont('Arial', 36, bold=True)
+    info_font = pygame.font.SysFont('Arial', 24)
+    
+    # Dice areas
+    dice_size = 120
+    black_dice_area = pygame.Rect(WIDTH//2 - dice_size - 50, 250, dice_size, dice_size)
+    white_dice_area = pygame.Rect(WIDTH//2 + 50, 250, dice_size, dice_size)
+
+    # Animation
+    animation_frames = 25
+    for frame in range(animation_frames):
+        screen.fill(BACKGROUND_COLOR)
+        
+        title_text = title_font.render("DETERMINING FIRST TURN", True, (255, 215, 0))
+        title_rect = title_text.get_rect(center=(WIDTH//2, 80))
+        screen.blit(title_text, title_rect)
+        
+        # Names
+        black_name_text = name_font.render(f"{black_name}", True, (200, 200, 200))
+        white_name_text = name_font.render(f"{white_name}", True, (200, 200, 200))
+        screen.blit(black_name_text, (WIDTH//2 - 300, 150))
+        screen.blit(white_name_text, (WIDTH//2 + 100, 150))
+        
+        # Animated dice
+        anim_black_val = random.randint(1, 6)
+        anim_white_val = random.randint(1, 6)
+        
+        draw_dice(screen, black_dice_area, anim_black_val)
+        draw_dice(screen, white_dice_area, anim_white_val)
+        
+        # Animated text
+        roll_text = info_font.render("Rolling dice..." + "." * (frame % 4), True, (255, 255, 0))
+        roll_rect = roll_text.get_rect(center=(WIDTH//2, 400))
+        screen.blit(roll_text, roll_rect)
+        
+        pygame.display.flip()
+        pygame.time.delay(20)
+    
+    # Use the real method after the timeout
+    temp_game.set_first_turn()
+    
+    # Obtain values
+    final_black = temp_game.__dice1__.get_number()
+    final_white = temp_game.__dice2__.get_number()
+    first_turn = temp_game.get_turn()
+    
+    # Show final result
+    screen.fill(BACKGROUND_COLOR)
+    
+    title_text = title_font.render("FIRST TURN RESULT", True, (255, 215, 0))
+    title_rect = title_text.get_rect(center=(WIDTH//2, 80))
+    screen.blit(title_text, title_rect)
+    
+    # Names
+    black_name_text = name_font.render(f"{black_name}", True, (200, 200, 200))
+    white_name_text = name_font.render(f"{white_name}", True, (200, 200, 200))
+    screen.blit(black_name_text, (WIDTH//2 - 300, 150))
+    screen.blit(white_name_text, (WIDTH//2 + 100, 150))
+    
+    # Final dice
+    draw_dice(screen, black_dice_area, final_black)
+    draw_dice(screen, white_dice_area, final_white)
+    
+    # Numbers
+    value_font = pygame.font.SysFont('Arial', 28, bold=True)
+    black_value_text = value_font.render(f"Value: {final_black}", True, WHITE)
+    white_value_text = value_font.render(f"Value: {final_white}", True, WHITE)
+    screen.blit(black_value_text, (black_dice_area.centerx - 50, black_dice_area.bottom + 10))
+    screen.blit(white_value_text, (white_dice_area.centerx - 50, white_dice_area.bottom + 10))
+    
+    # Result
+    first_player = black_name if first_turn == "Black" else white_name
+    result_text = result_font.render(f"{first_player} ({first_turn}) goes first!", True, (0, 255, 0))
+    result_rect = result_text.get_rect(center=(WIDTH//2, 450))
+    screen.blit(result_text, result_rect)
+    
+    # Instruction (press any key to start)
+    continue_text = info_font.render("Press any key to start...", True, (255, 255, 0))
+    continue_rect = continue_text.get_rect(center=(WIDTH//2, 520))
+    screen.blit(continue_text, continue_rect)
+    
+    pygame.display.flip()
+    
+    # Wait for input
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type in [pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
+                waiting = False
+    
+    return first_turn
 
 def create_point_mapping(board_inner_rect, point_width, point_height):
     """Crea un diccionario que mapea puntos del board a coordenadas visuales"""
@@ -162,7 +388,7 @@ def draw_checkers_in_area(screen, area, checkers):
         border_color = WHITE if checker.get_colour() == "Black" else BLACK
         pygame.draw.circle(screen, border_color, (int(x), int(y)), checker_radius, 1)
 
-def draw_general_interface():
+def draw_general_interface(black_player_name, white_player_name):
     # Fill the background
     screen.fill(BACKGROUND_COLOR)
     
@@ -332,13 +558,18 @@ def draw_general_interface():
     # Inner board border
     pygame.draw.rect(screen, BLACK, board_inner, 1)
 
-    # SQUARES FOR CONTROLS IN THE RIGHT SQUARE
-    font = pygame.font.SysFont('Arial', 26, bold=True) # Set the font
+    # In control section
+    font = pygame.font.SysFont('Arial', 26, bold=True)
 
     # Black player control
-    black_text = font.render("BLACK PLAYER", True, WHITE)
+    black_text = font.render(f"BLACK: {black_player_name}", True, WHITE)
     black_text_rect = black_text.get_rect(centerx=black_player_control.centerx, top=black_player_control.top + 10)
     screen.blit(black_text, black_text_rect)
+
+    # White player control 
+    white_text = font.render(f"WHITE: {white_player_name}", True, WHITE)
+    white_text_rect = white_text.get_rect(centerx=white_player_control.centerx, top=white_player_control.top + 10)
+    screen.blit(white_text, white_text_rect)
 
     font = pygame.font.SysFont('Arial', 20, bold=True) # Set the font
 
@@ -349,13 +580,6 @@ def draw_general_interface():
     black_eaten_text = font.render("HOUSE: ", True, WHITE)
     black_eaten_text_rect = black_eaten_text.get_rect(centerx=black_player_control.left + 120, top=black_player_control.top + 100)
     screen.blit(black_eaten_text, black_eaten_text_rect)
-
-    font = pygame.font.SysFont('Arial', 26, bold=True) # Set the font
-    
-    # White player control
-    white_text = font.render("WHITE PLAYER", True, WHITE)
-    white_text_rect = white_text.get_rect(centerx=white_player_control.centerx, top=white_player_control.top + 10)
-    screen.blit(white_text, white_text_rect)
 
     font = pygame.font.SysFont('Arial', 20, bold=True) # Set the font
 
@@ -422,6 +646,9 @@ def draw_general_interface():
 
 # Main game loop
 running = True
+black_player_name, white_player_name = get_player_names()
+first_turn_color = determine_first_turn(black_player_name, white_player_name)
+game.set_turn(first_turn_color)
 while running:
     # Handle events
     for event in pygame.event.get():
@@ -431,8 +658,7 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-    
-    draw_general_interface()
+    draw_general_interface(black_player_name, white_player_name)
 
     # Update the screen
     pygame.display.flip()
