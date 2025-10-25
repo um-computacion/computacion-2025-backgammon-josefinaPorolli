@@ -29,9 +29,64 @@ BLACK_CHECKER_COLOR = ("#2B2118")
 WHITE_CHECKER_COLOR = ("#F7F3E3")
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+BUTTON_COLOR = ("#4CAF50")
+BUTTON_HOVER_COLOR = ("#45a049")
+BUTTON_TEXT_COLOR = WHITE
+ERROR_COLOR = (255, 50, 50)
+INFO_COLOR = (255, 255, 0)
 
 # Margins
 MARGIN = 5
+
+# Game state variables
+dice_rolled = False
+current_dice_values = [0, 0]  # Store current dice values
+available_moves = []  # Store available moves for current turn
+selected_point = None  # Currently selected point for movement
+current_message = ""  # Message to display to player
+message_color = INFO_COLOR  # Color of the current message
+has_valid_moves = True  # Flag to check if there are valid moves
+skip_turn_button = None  # Button to skip turn when no moves available
+
+class Button:
+    def __init__(self, x, y, width, height, text, color=BUTTON_COLOR, hover_color=BUTTON_HOVER_COLOR):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.color = color
+        self.hover_color = hover_color
+        self.is_hovered = False
+        self.visible = True
+        
+    def draw(self, surface):
+        if not self.visible:
+            return
+            
+        color = self.hover_color if self.is_hovered else self.color
+        pygame.draw.rect(surface, color, self.rect, border_radius=8)
+        pygame.draw.rect(surface, BLACK, self.rect, 2, border_radius=8)
+        
+        font = pygame.font.SysFont('Arial', 20, bold=True)
+        text_surface = font.render(self.text, True, BUTTON_TEXT_COLOR)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        surface.blit(text_surface, text_rect)
+        
+    def check_hover(self, pos):
+        if not self.visible:
+            self.is_hovered = False
+            return
+        self.is_hovered = self.rect.collidepoint(pos)
+        
+    def is_clicked(self, pos, event):
+        if not self.visible:
+            return False
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            return self.rect.collidepoint(pos)
+        return False
+
+# Create buttons
+roll_button_black = Button(0, 0, 150, 40, "ROLL DICE")
+roll_button_white = Button(0, 0, 150, 40, "ROLL DICE")
+skip_turn_button = Button(0, 0, 150, 40, "SKIP TURN", color=(200, 100, 50), hover_color=(180, 80, 40))
 
 def get_player_names():
     """Obtains the players' names at the beginning of the game"""
@@ -116,9 +171,12 @@ def get_player_names():
     
     return black_name, white_name
 
-def draw_dice(screen, rect, value):
-    """Draws the dice"""
-    # Background
+def draw_dice(screen, rect, value, is_selected=False):
+    """Draws the dice with optional selection highlight"""
+    # Background with selection highlight
+    if is_selected:
+        pygame.draw.rect(screen, (255, 255, 100), rect.inflate(8, 8), border_radius=14)
+    
     pygame.draw.rect(screen, WHITE, rect, border_radius=12)
     pygame.draw.rect(screen, BLACK, rect, 2, border_radius=12)
     
@@ -259,11 +317,11 @@ def determine_first_turn(black_name, white_name):
     return first_turn
 
 def create_point_mapping(board_inner_rect, point_width, point_height):
-    """Crea un diccionario que mapea puntos del board a coordenadas visuales"""
+    """Creates a dictionary mapping board points to visual coordinates"""
     point_mapping = {}
     board_inner = board_inner_rect
     
-    # Puntos 13-18 (superior izquierda)
+    # Points 13-18 (top left)
     for i in range(6):
         point_number = 13 + i
         point_mapping[str(point_number)] = {
@@ -276,7 +334,7 @@ def create_point_mapping(board_inner_rect, point_width, point_height):
             "direction": "down"
         }
     
-    # Puntos 19-24 (superior derecha)
+    # Points 19-24 (top right)
     for i in range(6):
         point_number = 19 + i
         point_mapping[str(point_number)] = {
@@ -289,7 +347,7 @@ def create_point_mapping(board_inner_rect, point_width, point_height):
             "direction": "down"
         }
     
-    # Puntos 12-7 (inferior izquierda)
+    # Points 12-7 (bottom left)
     for i in range(6):
         point_number = 12 - i
         point_mapping[str(point_number)] = {
@@ -302,7 +360,7 @@ def create_point_mapping(board_inner_rect, point_width, point_height):
             "direction": "up"
         }
     
-    # Puntos 6-1 (inferior derecha)
+    # Points 6-1 (bottom right)
     for i in range(6):
         point_number = 6 - i
         point_mapping[str(point_number)] = {
@@ -315,12 +373,20 @@ def create_point_mapping(board_inner_rect, point_width, point_height):
             "direction": "up"
         }
     
+    # Add special areas
+    point_mapping["BEaten"] = {"rect": pygame.Rect(0, 0, 100, 50), "direction": "none"}
+    point_mapping["WEaten"] = {"rect": pygame.Rect(0, 0, 100, 50), "direction": "none"}
+    
     return point_mapping
 
-def draw_checkers_on_point(screen, point_data, checkers, max_display=5):
-    """Draws all the checkers in a specific point"""
+def draw_checkers_on_point(screen, point_data, checkers, max_display=5, is_selected=False):
+    """Draws all the checkers in a specific point with selection highlight"""
     point_rect = point_data["rect"]
     direction = point_data["direction"]
+    
+    # Draw selection highlight
+    if is_selected:
+        pygame.draw.rect(screen, (100, 255, 100), point_rect.inflate(6, 6), border_radius=4)
     
     checker_radius = min(point_rect.width, 20)
     spacing = checker_radius * 2
@@ -388,7 +454,201 @@ def draw_checkers_in_area(screen, area, checkers):
         border_color = WHITE if checker.get_colour() == "Black" else BLACK
         pygame.draw.circle(screen, border_color, (int(x), int(y)), checker_radius, 1)
 
+def roll_dice():
+    """Roll the dice and update game state"""
+    global dice_rolled, current_dice_values, available_moves, selected_point, current_message, has_valid_moves
+    
+    # Roll the dice
+    dice1_val = game.__dice1__.roll()
+    dice2_val = game.__dice2__.roll()
+    
+    current_dice_values = [dice1_val, dice2_val]
+    dice_rolled = True
+    selected_point = None
+    current_message = ""
+    
+    # Initialize available moves list
+    available_moves = []
+    
+    if dice1_val == dice2_val:
+        # Doubles - 4 moves with the same value
+        available_moves = [dice1_val, dice1_val, dice1_val, dice1_val]
+    else:
+        # Normal roll - 2 different moves
+        available_moves = [dice1_val, dice2_val]
+    
+    # Check if there are any valid moves
+    check_valid_moves()
+
+def check_valid_moves():
+    """Check if there are any valid moves available with current dice"""
+    global has_valid_moves, current_message
+    
+    has_valid_moves = False
+    board_state = game.__board__.get_board()
+    current_color = game.get_turn()
+    
+    # Check each available move
+    for move in set(available_moves):
+        # Check all points including special areas
+        for point in board_state.keys():
+            checkers = board_state[point]
+            # Check if point has checkers of current player
+            if checkers and checkers[0].get_colour() == current_color:
+                if game.check_move(point, move):
+                    has_valid_moves = True
+                    return
+    
+    # If no valid moves found
+    if not has_valid_moves:
+        current_message = "No valid moves available. Click SKIP TURN to continue."
+        print("No valid moves available")
+
+def draw_dice_section(screen, player_control_rect, dice_values, is_doubles=False, selected_dice=None):
+    """Draw dice section for a specific player with clickable dice"""
+    dice_size = 50
+    spacing = 10
+    
+    # Calculate total width needed
+    if is_doubles:
+        total_width = (dice_size * 4) + (spacing * 3)
+    else:
+        total_width = (dice_size * 2) + spacing
+    
+    start_x = player_control_rect.centerx - (total_width // 2)
+    y_pos = player_control_rect.centery + 30
+    
+    # Draw dice
+    if is_doubles:
+        # Draw 4 dice for doubles
+        for i in range(4):
+            dice_rect = pygame.Rect(
+                start_x + i * (dice_size + spacing),
+                y_pos,
+                dice_size,
+                dice_size
+            )
+            is_selected = (selected_dice == dice_values[0])
+            draw_dice(screen, dice_rect, dice_values[0], is_selected)  # All same value for doubles
+    else:
+        # Draw 2 dice for normal roll
+        for i in range(2):
+            dice_rect = pygame.Rect(
+                start_x + i * (dice_size + spacing),
+                y_pos,
+                dice_size,
+                dice_size
+            )
+            is_selected = (selected_dice == dice_values[i])
+            draw_dice(screen, dice_rect, dice_values[i], is_selected)
+
+def get_clicked_dice(mouse_pos, player_control_rect, dice_values, is_doubles=False):
+    """Check if a dice was clicked and return its value"""
+    dice_size = 50
+    spacing = 10
+    
+    # Calculate total width needed
+    if is_doubles:
+        total_width = (dice_size * 4) + (spacing * 3)
+    else:
+        total_width = (dice_size * 2) + spacing
+    
+    start_x = player_control_rect.centerx - (total_width // 2)
+    y_pos = player_control_rect.centery + 30
+    
+    # Check dice clicks
+    if is_doubles:
+        # Check 4 dice for doubles
+        for i in range(4):
+            dice_rect = pygame.Rect(
+                start_x + i * (dice_size + spacing),
+                y_pos,
+                dice_size,
+                dice_size
+            )
+            if dice_rect.collidepoint(mouse_pos):
+                return dice_values[0]  # All same value for doubles
+    else:
+        # Check 2 dice for normal roll
+        for i in range(2):
+            dice_rect = pygame.Rect(
+                start_x + i * (dice_size + spacing),
+                y_pos,
+                dice_size,
+                dice_size
+            )
+            if dice_rect.collidepoint(mouse_pos):
+                return dice_values[i]
+    
+    return None
+
+def execute_move(origin_point, dice_value):
+    """Execute a move with the given origin point and dice value"""
+    global available_moves, selected_point, current_message, dice_rolled
+    
+    # Validate the move
+    if not game.check_move(origin_point, dice_value):
+        current_message = "Invalid move! Please try again."
+        message_color = ERROR_COLOR
+        return False
+    
+    # Execute the move
+    try:
+        game.move_checker(origin_point, dice_value)
+        
+        # Remove the used move from available moves
+        if dice_value in available_moves:
+            available_moves.remove(dice_value)
+            current_message = f"Move executed! {len(available_moves)} moves remaining."
+        
+        # Reset selection
+        selected_point = None
+        
+        # Check for winner
+        winner = game.check_winner()
+        if winner != "None":
+            current_message = f"🎉 {winner} WINS THE GAME! 🎉"
+            dice_rolled = False  # Prevent further moves
+            return True
+        
+        # If no moves left, end turn
+        if not available_moves:
+            current_message = "All moves completed! Switching turn..."
+            switch_turn()
+            return True
+        
+        # Check if remaining moves are still valid
+        check_valid_moves()
+        if not has_valid_moves:
+            current_message = "No more valid moves available. Switching turn..."
+            switch_turn()
+            return True
+            
+        return True
+        
+    except Exception as e:
+        current_message = f"Error executing move: {str(e)}"
+        message_color = ERROR_COLOR
+        return False
+
+def switch_turn():
+    """Switch to the next player's turn"""
+    global dice_rolled, selected_point, current_message, available_moves
+    
+    # Reset game state for next turn
+    dice_rolled = False
+    selected_point = None
+    available_moves = []
+    
+    # Switch turn
+    next_color = "White" if game.get_turn() == "Black" else "Black"
+    game.set_turn(next_color)
+    
+    current_message = f"{next_color}'s turn. Click ROLL DICE to start."
+
 def draw_general_interface(black_player_name, white_player_name):
+    global dice_rolled, current_dice_values, selected_point, current_message, has_valid_moves
+    
     # Fill the background
     screen.fill(BACKGROUND_COLOR)
     
@@ -446,7 +706,7 @@ def draw_general_interface(black_player_name, white_player_name):
     pygame.draw.rect(screen, BLACK, white_player_control, 2)
 
     # BACKGAMMON BOARD
-    board_margin = 20  # Margen interno del tablero
+    board_margin = 20  # Internal board margin
     board_inner = pygame.Rect(
         board_square.left + board_margin,
         board_square.top + board_margin,
@@ -598,9 +858,11 @@ def draw_general_interface(black_player_name, white_player_name):
     board_state = game.__board__.get_board()
 
     for point_num, point_data in point_mapping.items():
-        checkers_in_point = board_state.get(point_num, [])
-        if checkers_in_point:
-            draw_checkers_on_point(screen, point_data, checkers_in_point)
+        if point_num in board_state:  # Only draw if point exists in board state
+            checkers_in_point = board_state.get(point_num, [])
+            is_selected = (selected_point == point_num)
+            if checkers_in_point:
+                draw_checkers_on_point(screen, point_data, checkers_in_point, is_selected=is_selected)
 
     # Areas for Black player
     black_eaten_area = pygame.Rect(
@@ -644,25 +906,198 @@ def draw_general_interface(black_player_name, white_player_name):
     draw_checkers_in_area(screen, white_eaten_area, board_state.get("WEaten", []))
     draw_checkers_in_area(screen, white_house_area, board_state.get("WHouse", []))
 
-# Main game loop
-running = True
-black_player_name, white_player_name = get_player_names()
-first_turn_color = determine_first_turn(black_player_name, white_player_name)
-game.set_turn(first_turn_color)
-while running:
-    # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        # Exit also with esc
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-    draw_general_interface(black_player_name, white_player_name)
+    # Position buttons for rolling dice
+    roll_button_black.rect.centerx = black_player_control.centerx
+    roll_button_black.rect.centery = black_player_control.centery - 20
+    
+    roll_button_white.rect.centerx = white_player_control.centerx
+    roll_button_white.rect.centery = white_player_control.centery - 20
+    
+    # Position skip turn button
+    skip_turn_button.rect.centerx = black_player_control.centerx if game.get_turn() == "Black" else white_player_control.centerx
+    skip_turn_button.rect.centery = (black_player_control.centery if game.get_turn() == "Black" else white_player_control.centery) + 100
 
-    # Update the screen
+    # Draw dice and buttons based on current turn
+    current_turn = game.get_turn()
+    mouse_pos = pygame.mouse.get_pos()
+    
+    # Show current turn
+    turn_font = pygame.font.SysFont('Arial', 24, bold=True)
+    
+    # Show game message
+    if current_message:
+        message_font = pygame.font.SysFont('Arial', 18, bold=True)
+        message_text = message_font.render(current_message, True, message_color)
+        message_rect = message_text.get_rect(center=(board_square.centerx, board_square.bottom - 50))
+        screen.blit(message_text, message_rect)
+    
+    if dice_rolled:
+        # Show dice only for the current player
+        is_doubles = current_dice_values[0] == current_dice_values[1]
+        
+        if current_turn == "Black":
+            draw_dice_section(screen, black_player_control, current_dice_values, is_doubles, selected_point)
+        else:
+            draw_dice_section(screen, white_player_control, current_dice_values, is_doubles, selected_point)
+            
+        # Show doubles message if applicable
+        if is_doubles:
+            doubles_font = pygame.font.SysFont('Arial', 16, bold=True)
+            doubles_text = doubles_font.render("DOUBLES! 4 moves available", True, (255, 255, 0))
+            if current_turn == "Black":
+                doubles_rect = doubles_text.get_rect(center=(black_player_control.centerx, black_player_control.centery + 90))
+            else:
+                doubles_rect = doubles_text.get_rect(center=(white_player_control.centerx, white_player_control.centery + 90))
+            screen.blit(doubles_text, doubles_rect)
+            
+        # Show skip turn button if no valid moves
+        if not has_valid_moves:
+            skip_turn_button.visible = True
+            skip_turn_button.check_hover(mouse_pos)
+            skip_turn_button.draw(screen)
+        else:
+            skip_turn_button.visible = False
+            
+    else:
+        # Show roll button only for the current player
+        if current_turn == "Black":
+            roll_button_black.visible = True
+            roll_button_black.check_hover(mouse_pos)
+            roll_button_black.draw(screen)
+            roll_button_white.visible = False
+        else:
+            roll_button_white.visible = True
+            roll_button_white.check_hover(mouse_pos)
+            roll_button_white.draw(screen)
+            roll_button_black.visible = False
+            
+        skip_turn_button.visible = False
+
     pygame.display.flip()
 
-# Exit Pygame
-pygame.quit()
-sys.exit()
+def handle_point_click(mouse_pos):
+    """Handle clicks on board points"""
+    global selected_point, current_message
+    
+    # Calculate board area
+    board_square = pygame.Rect(MARGIN, MARGIN, (WIDTH - 2*MARGIN) * 2 // 3, HEIGHT - 2*MARGIN)
+    board_margin = 20
+    board_inner = pygame.Rect(
+        board_square.left + board_margin,
+        board_square.top + board_margin,
+        board_square.width - 2 * board_margin,
+        board_square.height - 2 * board_margin
+    )
+    
+    point_width = board_inner.width // 12
+    point_height = board_inner.height // 2
+    
+    # Create temporary point mapping for click detection
+    point_mapping = create_point_mapping(board_inner, point_width, point_height)
+    
+    # Check if any point was clicked
+    for point_num, point_data in point_mapping.items():
+        if point_data["rect"].collidepoint(mouse_pos):
+            # Check if point has checkers of current player
+            board_state = game.__board__.get_board()
+            checkers = board_state.get(point_num, [])
+            current_color = game.get_turn()
+            
+            if checkers and checkers[0].get_colour() == current_color:
+                selected_point = point_num
+                current_message = f"Selected point {point_num}. Now click a dice to move."
+                return True
+            elif checkers:
+                current_message = "You can only move your own checkers!"
+                return False
+            else:
+                current_message = "No checkers in this point!"
+                return False
+    
+    return False
+
+def main():
+    global dice_rolled, current_dice_values, selected_point, current_message, has_valid_moves
+    
+    # Get player names
+    black_name, white_name = get_player_names()
+    
+    # Determine first turn
+    first_turn = determine_first_turn(black_name, white_name)
+    game.set_turn(first_turn)
+    
+    # Initialize game message
+    current_message = f"{first_turn}'s turn. Click ROLL DICE to start."
+    
+    # Main game loop
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            mouse_pos = pygame.mouse.get_pos()
+            
+            # Handle button clicks
+            current_turn = game.get_turn()
+            
+            if not dice_rolled:
+                # Roll dice button
+                if current_turn == "Black":
+                    if roll_button_black.is_clicked(mouse_pos, event):
+                        roll_dice()
+                else:
+                    if roll_button_white.is_clicked(mouse_pos, event):
+                        roll_dice()
+            else:
+                # Skip turn button (when no valid moves)
+                if skip_turn_button.is_clicked(mouse_pos, event) and not has_valid_moves:
+                    current_message = "Skipping turn..."
+                    switch_turn()
+                
+                # Handle point selection
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # Check if a point was clicked
+                    if handle_point_click(mouse_pos):
+                        continue
+                    
+                    # Check if a dice was clicked (if a point is already selected)
+                    if selected_point:
+                        player_control = None
+                        if current_turn == "Black":
+                            player_control = pygame.Rect(
+                                MARGIN + (WIDTH - 2*MARGIN) * 2 // 3, 
+                                MARGIN, 
+                                (WIDTH - 2*MARGIN) // 3,
+                                (HEIGHT - 2*MARGIN) // 2
+                            )
+                        else:
+                            player_control = pygame.Rect(
+                                MARGIN + (WIDTH - 2*MARGIN) * 2 // 3, 
+                                MARGIN + (HEIGHT - 2*MARGIN) // 2, 
+                                (WIDTH - 2*MARGIN) // 3,
+                                (HEIGHT - 2*MARGIN) // 2
+                            )
+                        
+                        is_doubles = current_dice_values[0] == current_dice_values[1]
+                        clicked_dice = get_clicked_dice(mouse_pos, player_control, current_dice_values, is_doubles)
+                        
+                        if clicked_dice and clicked_dice in available_moves:
+                            # Try to execute the move
+                            if execute_move(selected_point, clicked_dice):
+                                # Move successful
+                                pass
+                            else:
+                                # Move failed - keep selection for retry
+                                pass
+                        elif clicked_dice:
+                            current_message = "This dice value is not available or already used!"
+        
+        # Draw the interface
+        draw_general_interface(black_name, white_name)
+    
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    main()

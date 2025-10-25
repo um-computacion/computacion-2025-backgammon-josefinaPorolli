@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.4] - 25/10/25
+
+### Added
+
+- Pygame: Methods for rolling the dice and moving checkers. Bugs: when a checker is put on bar, the graphics don´t work properly and the checker is not removed from the point, messages would look better in each player's control square, the used dice should be removed from the graphics and don't quite like the green in a selected point.
+
 ## [2.0.3] - 22/10/25
 
 ### Added
