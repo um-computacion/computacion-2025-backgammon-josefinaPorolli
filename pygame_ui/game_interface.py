@@ -1,10 +1,6 @@
 import pygame
 import sys
-import os
 import random
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from core.backgammon_game import BackgammonGame
 
 game = BackgammonGame() # Define the game

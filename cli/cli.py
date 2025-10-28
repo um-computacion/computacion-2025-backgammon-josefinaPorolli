@@ -1,8 +1,5 @@
 """CLI module for Backgammon game"""
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from core.backgammon_game import BackgammonGame
 
 class BackgammonCLI:
