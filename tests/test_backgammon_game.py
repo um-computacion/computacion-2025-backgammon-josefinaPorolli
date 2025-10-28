@@ -1,5 +1,6 @@
 """Module for testing the Backgammon Game class"""
 import unittest
+from unittest.mock import Mock
 from core.backgammon_game import BackgammonGame
 
 class TestBackgammonGame(unittest.TestCase):
@@ -14,11 +15,53 @@ class TestBackgammonGame(unittest.TestCase):
         self.__game__.set_turn("White")
         self.assertEqual(self.__game__.get_turn(), "White")
 
-    def test_set_first_turn(self):
-        """Method for testing the first turn setter"""
-        self.__game__.set_first_turn()
-        # As it is random, we can only check that it is valid.
-        self.assertIn(self.__game__.get_turn(), ["Black", "White"])
+    def test_set_first_turn_black_wins(self):
+        """Test that Black starts when first dice is higher."""
+        game = BackgammonGame()
+        
+        # Mock the dice objects and set specific return values
+        game.__dice1__ = Mock()
+        game.__dice2__ = Mock()
+        game.__dice1__.roll.return_value = 5
+        game.__dice2__.roll.return_value = 3
+        
+        # Call the method under test
+        game.set_first_turn()
+        
+        # Verify the result
+        self.assertEqual(game.get_turn(), "Black")
+
+    def test_set_first_turn_white_wins(self):
+        """Test that White starts when second dice is higher."""
+        game = BackgammonGame()
+        
+        # Mock the dice objects and set specific return values
+        game.__dice1__ = Mock()
+        game.__dice2__ = Mock()
+        game.__dice1__.roll.return_value = 2
+        game.__dice2__.roll.return_value = 4
+        
+        # Call the method under test
+        game.set_first_turn()
+        
+        # Verify the result
+        self.assertEqual(game.get_turn(), "White")
+
+    def test_set_first_turn_handles_ties(self):
+        """Test that ties are handled by re-rolling."""
+        game = BackgammonGame()
+        
+        # Mock the dice objects with side_effect for multiple rolls
+        game.__dice1__ = Mock()
+        game.__dice2__ = Mock()
+        game.__dice1__.roll.side_effect = [3, 3, 6]  # First two ties, then different
+        game.__dice2__.roll.side_effect = [3, 3, 2]  # First two ties, then different
+        
+        # Call the method under test
+        game.set_first_turn()
+        
+        # Verify the result (6 > 2, so Black should win)
+        self.assertEqual(game.get_turn(), "Black")
 
     def test_set_default_checkers(self):
         """Method for testing default checkers setting"""

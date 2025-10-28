@@ -3,9 +3,13 @@ omit =
     */venv/*
     */tests/*
     core/__init__.py
+    cli/__init__.py
+    pygame_ui/__init__.py
 
 [report]
 omit =
     */venv/*
     */tests/*
     core/__init__.py
+    cli/__init__.py
+    pygame_ui/__init__.py

@@ -85,7 +85,6 @@ python -m coverage run -m unittest discover; python -m coverage report
 
 - If UI elements appear misaligned, check `pygame_ui/game_interface.py` for the layout constants (margins, control panel sizes).
 - For development, you can run individual modules directly from the project root using the `-m` flag.
-- Report bugs or unexpected behavior by opening an issue and including screenshots and the console output.
 
 Enjoy the game!
 
