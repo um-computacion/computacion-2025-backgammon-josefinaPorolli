@@ -5,9 +5,6 @@ from .player import Player
 from .dice import Dice
 from .checker import Checker
 
-# --- Methods to be added (temporary comment)---
-# Check winner
-
 class BackgammonGame:
     """Class with the methods for the logic of the game"""
     # CONSTRUCTOR - sets the main attributes of the class

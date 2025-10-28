@@ -3,7 +3,7 @@
 Author: Josefina Porolli Serpa (Legajo: 64133)
 Course: Computación I — 2025
 
-## Project structure
+## Basic project structure
 
 - `core/` - Game core logic (board, checkers, dice, player, game logic).
 - `cli/` - Command-line interface implementation and entry point.
@@ -11,12 +11,13 @@ Course: Computación I — 2025
 - `tests/` - Unit tests for core components.
 - `requirements.txt` - Python dependencies (install with pip).
 - `README.md` - This file.
+- `JUSTIFICACION.md` - Helpful file for presenting this project.
+- `CHANGELOG.md` - Document describing thee different changes made to the project.
 
 ## Requirements
 
 - Python 3.8+ (any modern 3.x should work)
 - Install dependencies listed in `requirements.txt`:
-
 ```
 python -m pip install -r requirements.txt
 ```
@@ -29,24 +30,12 @@ Start the text-based interface from the project root:
 python -m cli.cli
 ```
 
-Or:
-
-```
-python cli\cli.py
-```
-
 ## Run the Pygame graphical interface
 
 Start the graphical UI (the main window is `pygame_ui/game_interface.py`):
 
 ```
 python -m pygame_ui.game_interface
-```
-
-Or:
-
-```
-python pygame_ui\game_interface.py
 ```
 
 The game window size is defined by `WIDTH` and `HEIGHT` constants in `pygame_ui/game_interface.py`.
@@ -65,11 +54,10 @@ Run a single test module (example with tests for board module):
 python -m unittest tests.test_board
 ```
 
-Generate coverage report (HTML):
+Generate coverage report:
 
 ```
-coverage run -m unittest discover; coverage html
-# Open `htmlcov/index.html` with a browser to inspect results
+python -m coverage run -m unittest discover; python -m coverage report
 ```
 
 ## Controls (graphical UI)
