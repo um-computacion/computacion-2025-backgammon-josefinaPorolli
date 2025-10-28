@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 27/10/25
+
+### Changed
+
+- Pygame: mapped WEaten and BEaten checkers. Changed the green color in the selected checkers. Changed the winner message. The messages of the game are now shown on the player control section.
+
 ## [2.0.4] - 25/10/25
 
 ### Added

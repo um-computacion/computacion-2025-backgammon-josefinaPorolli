@@ -47,6 +47,9 @@ current_message = ""  # Message to display to player
 message_color = INFO_COLOR  # Color of the current message
 has_valid_moves = True  # Flag to check if there are valid moves
 skip_turn_button = None  # Button to skip turn when no moves available
+used_dice_values = []  # Track which dice values have been used
+black_player_name = ""  # Store black player's name
+white_player_name = ""  # Store white player's name
 
 class Button:
     def __init__(self, x, y, width, height, text, color=BUTTON_COLOR, hover_color=BUTTON_HOVER_COLOR):
@@ -171,17 +174,19 @@ def get_player_names():
     
     return black_name, white_name
 
-def draw_dice(screen, rect, value, is_selected=False):
-    """Draws the dice with optional selection highlight"""
+def draw_dice(screen, rect, value, is_selected=False, is_used=False):
+    """Draws the dice with optional selection highlight and used state"""
     # Background with selection highlight
     if is_selected:
         pygame.draw.rect(screen, (255, 255, 100), rect.inflate(8, 8), border_radius=14)
     
-    pygame.draw.rect(screen, WHITE, rect, border_radius=12)
+    # Use gray background for used dice
+    background_color = (180, 180, 180) if is_used else WHITE
+    pygame.draw.rect(screen, background_color, rect, border_radius=12)
     pygame.draw.rect(screen, BLACK, rect, 2, border_radius=12)
     
     dot_radius = rect.width // 15
-    dot_color = BLACK
+    dot_color = (100, 100, 100) if is_used else BLACK  # Lighter dots for used dice
     
     # Realtive positions
     center_x, center_y = rect.center
@@ -373,9 +378,34 @@ def create_point_mapping(board_inner_rect, point_width, point_height):
             "direction": "up"
         }
     
-    # Add special areas
-    point_mapping["BEaten"] = {"rect": pygame.Rect(0, 0, 100, 50), "direction": "none"}
-    point_mapping["WEaten"] = {"rect": pygame.Rect(0, 0, 100, 50), "direction": "none"}
+    # Add beaten areas from player controls
+    # Black player control area (top)
+    black_control_left = MARGIN + (WIDTH - 2*MARGIN) * 2 // 3  # Inicio del panel de control
+    point_mapping["BEaten"] = {
+        "rect": pygame.Rect(
+            black_control_left + 220,  # Posición X absoluta
+            MARGIN + 60,  # Posición Y absoluta para el panel negro (black_player_control.top + 60)
+            (WIDTH - 2*MARGIN) // 3 - 250,  # Ancho
+            30  # Alto
+        ),
+        "direction": "none"
+    }
+
+    # Compute same layout values used in draw_general_interface so coordinates match
+    message_area_height = 80
+    HEIGHT_player_control = (HEIGHT - 2*MARGIN - message_area_height) // 2
+
+    # White player control area (bottom) - align with draw_general_interface
+    white_control_top = MARGIN + HEIGHT_player_control + message_area_height
+    point_mapping["WEaten"] = {
+        "rect": pygame.Rect(
+            black_control_left + 220,  # Misma X que el negro
+            white_control_top + 60,  # Posición Y absoluta para el panel blanco (white_player_control.top + 60)
+            (WIDTH - 2*MARGIN) // 3 - 250,  # Ancho
+            30  # Alto
+        ),
+        "direction": "none"
+    }
     
     return point_mapping
 
@@ -386,7 +416,7 @@ def draw_checkers_on_point(screen, point_data, checkers, max_display=5, is_selec
     
     # Draw selection highlight
     if is_selected:
-        pygame.draw.rect(screen, (100, 255, 100), point_rect.inflate(6, 6), border_radius=4)
+        pygame.draw.rect(screen, (200, 200, 200), point_rect.inflate(6, 6), border_radius=4)
     
     checker_radius = min(point_rect.width, 20)
     spacing = checker_radius * 2
@@ -456,7 +486,7 @@ def draw_checkers_in_area(screen, area, checkers):
 
 def roll_dice():
     """Roll the dice and update game state"""
-    global dice_rolled, current_dice_values, available_moves, selected_point, current_message, has_valid_moves
+    global dice_rolled, current_dice_values, available_moves, selected_point, current_message, has_valid_moves, used_dice_values
     
     # Roll the dice
     dice1_val = game.__dice1__.roll()
@@ -466,6 +496,7 @@ def roll_dice():
     dice_rolled = True
     selected_point = None
     current_message = ""
+    used_dice_values = []  # Reset used dice values
     
     # Initialize available moves list
     available_moves = []
@@ -506,6 +537,7 @@ def check_valid_moves():
 
 def draw_dice_section(screen, player_control_rect, dice_values, is_doubles=False, selected_dice=None):
     """Draw dice section for a specific player with clickable dice"""
+    global used_dice_values
     dice_size = 50
     spacing = 10
     
@@ -521,6 +553,7 @@ def draw_dice_section(screen, player_control_rect, dice_values, is_doubles=False
     # Draw dice
     if is_doubles:
         # Draw 4 dice for doubles
+        remaining_moves = available_moves.count(dice_values[0])  # Count remaining moves for doubles
         for i in range(4):
             dice_rect = pygame.Rect(
                 start_x + i * (dice_size + spacing),
@@ -529,7 +562,8 @@ def draw_dice_section(screen, player_control_rect, dice_values, is_doubles=False
                 dice_size
             )
             is_selected = (selected_dice == dice_values[0])
-            draw_dice(screen, dice_rect, dice_values[0], is_selected)  # All same value for doubles
+            is_used = (i >= remaining_moves)  # Mark as used if we've used this many moves
+            draw_dice(screen, dice_rect, dice_values[0], is_selected, is_used)
     else:
         # Draw 2 dice for normal roll
         for i in range(2):
@@ -540,7 +574,8 @@ def draw_dice_section(screen, player_control_rect, dice_values, is_doubles=False
                 dice_size
             )
             is_selected = (selected_dice == dice_values[i])
-            draw_dice(screen, dice_rect, dice_values[i], is_selected)
+            is_used = dice_values[i] not in available_moves  # Check if this value has been used
+            draw_dice(screen, dice_rect, dice_values[i], is_selected, is_used)
 
 def get_clicked_dice(mouse_pos, player_control_rect, dice_values, is_doubles=False):
     """Check if a dice was clicked and return its value"""
@@ -607,8 +642,10 @@ def execute_move(origin_point, dice_value):
         # Check for winner
         winner = game.check_winner()
         if winner != "None":
-            current_message = f"🎉 {winner} WINS THE GAME! 🎉"
+            winner_name = black_player_name if winner == "Black" else white_player_name
+            current_message = f"{winner_name} ({winner}) WINS THE GAME!"
             dice_rolled = False  # Prevent further moves
+            game.set_turn("None")  # Set turn to None to prevent further rolls
             return True
         
         # If no moves left, end turn
@@ -676,8 +713,11 @@ def draw_general_interface(black_player_name, white_player_name):
         HEIGHT - 2*MARGIN
     )
 
-    # Divide the right quadrant into 2 equal parts (top and bottom)
-    HEIGHT_player_control = (HEIGHT - 2*MARGIN) // 2
+    # Define message area height
+    message_area_height = 80  # Altura para el área de mensajes
+    
+    # Adjust player control heights to accommodate message area
+    HEIGHT_player_control = (HEIGHT - 2*MARGIN - message_area_height) // 2
     
     # Mini superior square for black player control
     black_player_control = pygame.Rect(
@@ -687,10 +727,18 @@ def draw_general_interface(black_player_name, white_player_name):
         HEIGHT_player_control
     )
     
+    # Message area in the middle
+    message_area = pygame.Rect(
+        MARGIN + left_width,
+        MARGIN + HEIGHT_player_control,
+        right_width,
+        message_area_height
+    )
+    
     # Mini inferior square for white player control
     white_player_control = pygame.Rect(
         MARGIN + left_width, 
-        MARGIN + HEIGHT_player_control, 
+        MARGIN + HEIGHT_player_control + message_area_height, 
         right_width, 
         HEIGHT_player_control
     )
@@ -725,6 +773,8 @@ def draw_general_interface(black_player_name, white_player_name):
     font = pygame.font.SysFont('Arial', 14, bold=True)
 
     # Draw points and numbers
+
+
 
     # Upper left quadrant (points 13-18) - pointing DOWN
     for i in range(6):
@@ -858,7 +908,7 @@ def draw_general_interface(black_player_name, white_player_name):
     board_state = game.__board__.get_board()
 
     for point_num, point_data in point_mapping.items():
-        if point_num in board_state:  # Only draw if point exists in board state
+        if point_num in board_state and point_num not in ["BEaten", "WEaten"]:  # Skip BEaten/WEaten here
             checkers_in_point = board_state.get(point_num, [])
             is_selected = (selected_point == point_num)
             if checkers_in_point:
@@ -900,7 +950,33 @@ def draw_general_interface(black_player_name, white_player_name):
     pygame.draw.rect(screen, (50, 50, 50), white_eaten_area, 2)  
     pygame.draw.rect(screen, (50, 50, 50), white_house_area, 2)
 
-    # Draw checkers in special areas.
+    # Draw special areas (Eaten and House) with selection highlight
+    current_turn = game.get_turn()
+    
+    # Draw eaten areas with highlight if they have checkers or are selected
+    board_state = game.__board__.get_board()
+    black_has_eaten = len(board_state.get("BEaten", [])) > 0
+    white_has_eaten = len(board_state.get("WEaten", [])) > 0
+    
+    # Highlight for black eaten area
+    if black_has_eaten and current_turn == "Black":
+        pygame.draw.rect(screen, (80, 80, 80), black_eaten_area)  # Fondo más oscuro
+    if selected_point == "BEaten":
+        pygame.draw.rect(screen, (100, 255, 100), black_eaten_area, 3)  # Borde verde más grueso
+    
+    # Highlight for white eaten area
+    if white_has_eaten and current_turn == "White":
+        pygame.draw.rect(screen, (80, 80, 80), white_eaten_area)  # Fondo más oscuro
+    if selected_point == "WEaten":
+        pygame.draw.rect(screen, (100, 255, 100), white_eaten_area, 3)  # Borde verde más grueso
+    
+    # Draw borders for all areas
+    pygame.draw.rect(screen, (50, 50, 50), black_eaten_area, 2)
+    pygame.draw.rect(screen, (50, 50, 50), black_house_area, 2)
+    pygame.draw.rect(screen, (50, 50, 50), white_eaten_area, 2)  
+    pygame.draw.rect(screen, (50, 50, 50), white_house_area, 2)
+    
+    # Draw checkers in special areas
     draw_checkers_in_area(screen, black_eaten_area, board_state.get("BEaten", []))
     draw_checkers_in_area(screen, black_house_area, board_state.get("BHouse", []))
     draw_checkers_in_area(screen, white_eaten_area, board_state.get("WEaten", []))
@@ -908,10 +984,10 @@ def draw_general_interface(black_player_name, white_player_name):
 
     # Position buttons for rolling dice
     roll_button_black.rect.centerx = black_player_control.centerx
-    roll_button_black.rect.centery = black_player_control.centery - 20
+    roll_button_black.rect.centery = black_player_control.centery + 40
     
     roll_button_white.rect.centerx = white_player_control.centerx
-    roll_button_white.rect.centery = white_player_control.centery - 20
+    roll_button_white.rect.centery = white_player_control.centery + 40
     
     # Position skip turn button
     skip_turn_button.rect.centerx = black_player_control.centerx if game.get_turn() == "Black" else white_player_control.centerx
@@ -924,12 +1000,40 @@ def draw_general_interface(black_player_name, white_player_name):
     # Show current turn
     turn_font = pygame.font.SysFont('Arial', 24, bold=True)
     
-    # Show game message
+    # Show game message in the dedicated message area
     if current_message:
         message_font = pygame.font.SysFont('Arial', 18, bold=True)
-        message_text = message_font.render(current_message, True, message_color)
-        message_rect = message_text.get_rect(center=(board_square.centerx, board_square.bottom - 50))
-        screen.blit(message_text, message_rect)
+        
+        # Dividir el mensaje en líneas si es muy largo
+        words = current_message.split()
+        lines = []
+        current_line = words[0]
+        for word in words[1:]:
+            test_line = current_line + " " + word
+            test_surface = message_font.render(test_line, True, WHITE)
+            if test_surface.get_width() < right_width - 20:  # Margen de 10px a cada lado
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        
+        # Dibujar fondo semi-transparente para el mensaje
+        message_background = pygame.Surface((message_area.width, message_area.height))
+        message_background.set_alpha(128)
+        message_background.fill((30, 30, 30))  # Un poco más oscuro para mejor contraste
+        screen.blit(message_background, message_area)
+        
+        # Dibujar borde del área de mensajes
+        pygame.draw.rect(screen, (50, 50, 50), message_area, 1)
+        
+        # Dibujar cada línea del mensaje
+        y_offset = message_area.centery - (len(lines) * 22 // 2)  # Reducido el espaciado vertical
+        for line in lines:
+            text_surface = message_font.render(line, True, WHITE)
+            text_rect = text_surface.get_rect(center=(message_area.centerx, y_offset))
+            screen.blit(text_surface, text_rect)
+            y_offset += 22  # Reducido el espaciado entre líneas
     
     if dice_rolled:
         # Show dice only for the current player
@@ -959,17 +1063,21 @@ def draw_general_interface(black_player_name, white_player_name):
             skip_turn_button.visible = False
             
     else:
-        # Show roll button only for the current player
-        if current_turn == "Black":
-            roll_button_black.visible = True
-            roll_button_black.check_hover(mouse_pos)
-            roll_button_black.draw(screen)
-            roll_button_white.visible = False
+        # Show roll button only for the current player and if there's no winner
+        if current_turn != "None":  # Si no hay ganador
+            if current_turn == "Black":
+                roll_button_black.visible = True
+                roll_button_black.check_hover(mouse_pos)
+                roll_button_black.draw(screen)
+                roll_button_white.visible = False
+            else:
+                roll_button_white.visible = True
+                roll_button_white.check_hover(mouse_pos)
+                roll_button_white.draw(screen)
+                roll_button_black.visible = False
         else:
-            roll_button_white.visible = True
-            roll_button_white.check_hover(mouse_pos)
-            roll_button_white.draw(screen)
             roll_button_black.visible = False
+            roll_button_white.visible = False
             
         skip_turn_button.visible = False
 
@@ -1020,10 +1128,11 @@ def main():
     global dice_rolled, current_dice_values, selected_point, current_message, has_valid_moves
     
     # Get player names
-    black_name, white_name = get_player_names()
+    global black_player_name, white_player_name
+    black_player_name, white_player_name = get_player_names()
     
     # Determine first turn
-    first_turn = determine_first_turn(black_name, white_name)
+    first_turn = determine_first_turn(black_player_name, white_player_name)
     game.set_turn(first_turn)
     
     # Initialize game message
@@ -1064,19 +1173,23 @@ def main():
                     # Check if a dice was clicked (if a point is already selected)
                     if selected_point:
                         player_control = None
+                        # Use the same player control areas as in draw_general_interface
+                        message_area_height = 80
+                        HEIGHT_player_control = (HEIGHT - 2*MARGIN - message_area_height) // 2
+                        
                         if current_turn == "Black":
                             player_control = pygame.Rect(
                                 MARGIN + (WIDTH - 2*MARGIN) * 2 // 3, 
                                 MARGIN, 
                                 (WIDTH - 2*MARGIN) // 3,
-                                (HEIGHT - 2*MARGIN) // 2
+                                HEIGHT_player_control
                             )
                         else:
                             player_control = pygame.Rect(
                                 MARGIN + (WIDTH - 2*MARGIN) * 2 // 3, 
-                                MARGIN + (HEIGHT - 2*MARGIN) // 2, 
+                                MARGIN + HEIGHT_player_control + message_area_height, 
                                 (WIDTH - 2*MARGIN) // 3,
-                                (HEIGHT - 2*MARGIN) // 2
+                                HEIGHT_player_control
                             )
                         
                         is_doubles = current_dice_values[0] == current_dice_values[1]
@@ -1094,7 +1207,7 @@ def main():
                             current_message = "This dice value is not available or already used!"
         
         # Draw the interface
-        draw_general_interface(black_name, white_name)
+        draw_general_interface(black_player_name, white_player_name)
     
     pygame.quit()
     sys.exit()
