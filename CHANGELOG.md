@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 27/10/25
+
+### Changed
+
+- Pygame: mapped WEaten and BEaten checkers. Changed the green color in the selected checkers. Changed the winner message. The messages of the game are now shown on the player control section.
+
+## [2.0.4] - 25/10/25
+
+### Added
+
+- Pygame: Methods for rolling the dice and moving checkers. Bugs: when a checker is put on bar, the graphics don´t work properly and the checker is not removed from the point, messages would look better in each player's control square, the used dice should be removed from the graphics and don't quite like the green in a selected point.
+
+## [2.0.3] - 22/10/25
+
+### Added
+
+- Pygame: Methods for getting the player's names and using them. Also added a method that creates a new screen to set the first turn based on the value of each dice.
+
+## [2.0.2] - 22/10/25
+
+### Changed
+
+- Pygame: Mapped fields in the board with the triangles in the interface, and the special ones with rectangles. Also added the main game in the code and set the default checkers with its corresponding representation (circles)
+
+## [2.0.1] - 21/10/25
+
+### Changed
+
+- Restarted the cli interface so that I could have everything more controlled. Just made the background and some basic divisions wit AI's help.
+
+## [2.0.0] - 19/10/25
+
+### Added
+
+- Added a primitive AI generated pygame interface as what will be a guide, as I have never in my life used pygame so I need at least something to start with :/
+
 ## [1.0.3] - 18/10/25
 
 ### Changed

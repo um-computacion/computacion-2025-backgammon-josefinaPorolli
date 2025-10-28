@@ -685,3 +685,837 @@ Añade validaciones extra según vayas encontrando edge cases
 ¿Quieres que empecemos con alguna parte específica o tienes preguntas sobre algún componente del flujo?
 
 ## Used with changes in cli.py. Although of course it did not work at the beginning, i use it as a general guide for developing the CLI interface. Will add validations, fixes and adapt it to my own project.
+
+## DEEPSEEK
+
+## Pormpt:
+(added all the files in core/)
+Teniendo en cuenta estas clases, quiero que me armes un código básico de pygame para jugaar al backgammon. Estos archivos están en core/ y el pygame está en pygame_ui/game_interface.py
+
+## Answer:
+ódigo PyGame para Backgammon
+Aquí tienes un código básico de PyGame para jugar al Backgammon utilizando las clases que proporcionaste:
+
+python
+import pygame
+import sys
+import os
+
+# Añadir el directorio core al path para importar las clases
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
+
+from backgammon_game import BackgammonGame
+
+# Inicializar Pygame
+pygame.init()
+
+# Configuración de la pantalla
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Backgammon")
+
+# Colores
+BROWN = (139, 69, 19)
+LIGHT_BROWN = (222, 184, 135)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 128, 0)
+BLUE = (0, 0, 255)
+
+# Fuente
+font = pygame.font.SysFont('Arial', 20)
+
+# Crear instancia del juego
+game = BackgammonGame()
+game.set_default_checkers()
+game.set_first_turn()
+
+# Variables para el control del juego
+selected_point = None
+dice_rolled = False
+dice_values = [0, 0]
+available_moves = []
+
+def draw_board():
+    # Dibujar el tablero base
+    screen.fill(BROWN)
+    
+    # Dibujar el área central
+    pygame.draw.rect(screen, LIGHT_BROWN, (WIDTH//2 - 200, 50, 400, HEIGHT - 100))
+    
+    # Dibujar los puntos (triángulos)
+    point_width = 30
+    point_height = 200
+    
+    # Puntos del lado izquierdo (1-12)
+    for i in range(12):
+        x = WIDTH//2 - 200 + (i % 6) * (point_width + 10)
+        y = 50 if i < 6 else HEIGHT - 50 - point_height
+        
+        # Determinar dirección del triángulo
+        if i < 6:
+            points = [(x, y), (x + point_width, y), (x + point_width//2, y + point_height)]
+        else:
+            points = [(x, y + point_height), (x + point_width, y + point_height), (x + point_width//2, y)]
+        
+        pygame.draw.polygon(screen, BROWN, points)
+        pygame.draw.polygon(screen, BLACK, points, 1)
+    
+    # Puntos del lado derecho (13-24)
+    for i in range(12):
+        x = WIDTH//2 + 200 - point_width - (i % 6) * (point_width + 10)
+        y = 50 if i < 6 else HEIGHT - 50 - point_height
+        
+        # Determinar dirección del triángulo
+        if i < 6:
+            points = [(x, y), (x + point_width, y), (x + point_width//2, y + point_height)]
+        else:
+            points = [(x, y + point_height), (x + point_width, y + point_height), (x + point_width//2, y)]
+        
+        pygame.draw.polygon(screen, BROWN, points)
+        pygame.draw.polygon(screen, BLACK, points, 1)
+    
+    # Dibujar áreas de casas y comidas
+    pygame.draw.rect(screen, LIGHT_BROWN, (WIDTH//2 - 250, 50, 50, HEIGHT - 100))
+    pygame.draw.rect(screen, LIGHT_BROWN, (WIDTH//2 + 200, 50, 50, HEIGHT - 100))
+
+def draw_checkers():
+    board = game._BackgammonGame__board__.get_board()
+    
+    # Dibujar fichas en los puntos
+    for point in [str(i) for i in range(1, 25)]:
+        checkers = board[point]
+        if not checkers:
+            continue
+            
+        # Determinar posición del punto
+        point_idx = int(point) - 1
+        if point_idx < 12:  # Puntos 1-12 (lado izquierdo)
+            x = WIDTH//2 - 200 + (point_idx % 6) * 40 + 15
+            direction = 1 if point_idx < 6 else -1
+            y_start = 60 if point_idx < 6 else HEIGHT - 60
+        else:  # Puntos 13-24 (lado derecho)
+            x = WIDTH//2 + 200 - (point_idx % 6) * 40 - 45
+            direction = 1 if point_idx < 18 else -1
+            y_start = 60 if point_idx < 18 else HEIGHT - 60
+        
+        # Dibujar fichas
+        for i, checker in enumerate(checkers):
+            color = WHITE if checker.get_colour() == "White" else BLACK
+            border_color = BLACK if checker.get_colour() == "White" else WHITE
+            
+            y = y_start + i * 20 * direction
+            pygame.draw.circle(screen, color, (x, y), 15)
+            pygame.draw.circle(screen, border_color, (x, y), 15, 2)
+    
+    # Dibujar fichas comidas
+    for i, checker in enumerate(board["BEaten"]):
+        x = WIDTH//2 - 225
+        y = 100 + i * 30
+        pygame.draw.circle(screen, BLACK, (x, y), 15)
+        pygame.draw.circle(screen, WHITE, (x, y), 15, 2)
+    
+    for i, checker in enumerate(board["WEaten"]):
+        x = WIDTH//2 + 225
+        y = 100 + i * 30
+        pygame.draw.circle(screen, WHITE, (x, y), 15)
+        pygame.draw.circle(screen, BLACK, (x, y), 15, 2)
+    
+    # Dibujar fichas en casa
+    for i, checker in enumerate(board["BHouse"]):
+        x = WIDTH//2 - 275
+        y = 100 + i * 30
+        pygame.draw.circle(screen, BLACK, (x, y), 15)
+        pygame.draw.circle(screen, WHITE, (x, y), 15, 2)
+    
+    for i, checker in enumerate(board["WHouse"]):
+        x = WIDTH//2 + 275
+        y = 100 + i * 30
+        pygame.draw.circle(screen, WHITE, (x, y), 15)
+        pygame.draw.circle(screen, BLACK, (x, y), 15, 2)
+
+def draw_dice():
+    # Dibujar dados
+    dice1_x, dice2_x = WIDTH//2 - 50, WIDTH//2 + 20
+    dice_y = HEIGHT - 80
+    
+    # Dibujar fondo de dados
+    pygame.draw.rect(screen, WHITE, (dice1_x, dice_y, 40, 40))
+    pygame.draw.rect(screen, WHITE, (dice2_x, dice_y, 40, 40))
+    pygame.draw.rect(screen, BLACK, (dice1_x, dice_y, 40, 40), 2)
+    pygame.draw.rect(screen, BLACK, (dice2_x, dice_y, 40, 40), 2)
+    
+    # Dibujar puntos en los dados
+    if dice_values[0] > 0:
+        draw_dice_points(dice1_x, dice_y, dice_values[0])
+    if dice_values[1] > 0:
+        draw_dice_points(dice2_x, dice_y, dice_values[1])
+    
+    # Dibujar botón para lanzar dados
+    pygame.draw.rect(screen, GREEN, (WIDTH//2 - 60, dice_y - 60, 120, 40))
+    roll_text = font.render("Lanzar Dados", True, BLACK)
+    screen.blit(roll_text, (WIDTH//2 - 50, dice_y - 50))
+
+def draw_dice_points(x, y, value):
+    dot_radius = 4
+    positions = {
+        1: [(x + 20, y + 20)],
+        2: [(x + 10, y + 10), (x + 30, y + 30)],
+        3: [(x + 10, y + 10), (x + 20, y + 20), (x + 30, y + 30)],
+        4: [(x + 10, y + 10), (x + 30, y + 10), (x + 10, y + 30), (x + 30, y + 30)],
+        5: [(x + 10, y + 10), (x + 30, y + 10), (x + 20, y + 20), (x + 10, y + 30), (x + 30, y + 30)],
+        6: [(x + 10, y + 10), (x + 10, y + 20), (x + 10, y + 30), 
+            (x + 30, y + 10), (x + 30, y + 20), (x + 30, y + 30)]
+    }
+    
+    for pos in positions[value]:
+        pygame.draw.circle(screen, BLACK, pos, dot_radius)
+
+def draw_game_info():
+    # Dibujar información del juego
+    turn_text = font.render(f"Turno: {game.get_turn()}", True, WHITE)
+    screen.blit(turn_text, (20, 20))
+    
+    # Dibujar movimientos disponibles si hay un punto seleccionado
+    if selected_point and available_moves:
+        moves_text = font.render(f"Movimientos disponibles: {available_moves}", True, WHITE)
+        screen.blit(moves_text, (20, 50))
+    
+    # Verificar si hay un ganador
+    winner = game.check_winner()
+    if winner != "None":
+        winner_text = font.render(f"¡{winner} gana!", True, RED)
+        screen.blit(winner_text, (WIDTH//2 - 100, 20))
+
+def get_point_from_mouse(pos):
+    x, y = pos
+    
+    # Verificar puntos del lado izquierdo (1-12)
+    if WIDTH//2 - 200 <= x <= WIDTH//2 - 200 + 240:
+        if 50 <= y <= 250:  # Puntos 1-6
+            point_idx = (x - (WIDTH//2 - 200)) // 40
+            return str(point_idx + 1)
+        elif HEIGHT - 250 <= y <= HEIGHT - 50:  # Puntos 7-12
+            point_idx = (x - (WIDTH//2 - 200)) // 40
+            return str(point_idx + 7)
+    
+    # Verificar puntos del lado derecho (13-24)
+    if WIDTH//2 + 200 - 240 <= x <= WIDTH//2 + 200:
+        if 50 <= y <= 250:  # Puntos 13-18
+            point_idx = 5 - (x - (WIDTH//2 + 200 - 240)) // 40
+            return str(point_idx + 13)
+        elif HEIGHT - 250 <= y <= HEIGHT - 50:  # Puntos 19-24
+            point_idx = 5 - (x - (WIDTH//2 + 200 - 240)) // 40
+            return str(point_idx + 19)
+    
+    # Verificar áreas especiales
+    if WIDTH//2 - 250 <= x <= WIDTH//2 - 200:
+        if game.get_turn() == "Black":
+            return "BEaten"
+        else:
+            return "BHouse"
+    
+    if WIDTH//2 + 200 <= x <= WIDTH//2 + 250:
+        if game.get_turn() == "White":
+            return "WEaten"
+        else:
+            return "WHouse"
+    
+    return None
+
+def roll_dice():
+    global dice_rolled, dice_values
+    dice_values = [game._BackgammonGame__dice1__.roll(), game._BackgammonGame__dice2__.roll()]
+    dice_rolled = True
+
+# Bucle principal del juego
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            
+            # Verificar si se hizo clic en el botón de lanzar dados
+            if WIDTH//2 - 60 <= pos[0] <= WIDTH//2 + 60 and HEIGHT - 140 <= pos[1] <= HEIGHT - 100:
+                if not dice_rolled and game.check_winner() == "None":
+                    roll_dice()
+            
+            # Verificar si se hizo clic en un punto
+            point = get_point_from_mouse(pos)
+            if point:
+                if dice_rolled:
+                    if selected_point is None:
+                        # Seleccionar un punto
+                        selected_point = point
+                        # Calcular movimientos disponibles
+                        available_moves = []
+                        for steps in dice_values:
+                            if game.check_move(selected_point, steps):
+                                available_moves.append(steps)
+                    else:
+                        # Intentar mover la ficha
+                        if selected_point == point:
+                            # Deseleccionar si se hace clic en el mismo punto
+                            selected_point = None
+                            available_moves = []
+                        else:
+                            # Calcular pasos basados en el punto de destino
+                            # (Esta es una simplificación, en un juego real necesitarías
+                            # una lógica más compleja para determinar los pasos)
+                            if available_moves:
+                                steps = available_moves[0]
+                                if game.check_move(selected_point, steps):
+                                    game.move_checker(selected_point, steps)
+                                    # Eliminar el dado usado
+                                    dice_values.remove(steps)
+                                    if not dice_values:
+                                        dice_rolled = False
+                                        # Cambiar turno
+                                        if game.get_turn() == "Black":
+                                            game.set_turn("White")
+                                        else:
+                                            game.set_turn("Black")
+                                selected_point = None
+                                available_moves = []
+    
+    # Dibujar el juego
+    draw_board()
+    draw_checkers()
+    draw_dice()
+    draw_game_info()
+    
+    # Actualizar la pantalla
+    pygame.display.flip()
+
+# Salir del juego
+pygame.quit()
+sys.exit()
+Instrucciones de uso:
+Guarda este código en pygame_ui/game_interface.py
+
+Asegúrate de que la estructura de directorios sea:
+
+text
+proyecto/
+├── core/
+│   ├── backgammon_game.py
+│   ├── board.py
+│   ├── checker.py
+│   ├── dice.py
+│   └── player.py
+└── pygame_ui/
+    └── game_interface.py
+Características del juego:
+Interfaz visual: Tablero de backgammon con puntos triangulares
+
+Fichas: Se muestran las fichas blancas y negras en sus posiciones
+
+Dados: Se pueden lanzar los dados haciendo clic en el botón "Lanzar Dados"
+
+Movimientos: Selecciona una ficha y luego el punto de destino
+
+Turnos: El juego alterna automáticamente entre jugadores
+
+Detección de ganador: Muestra un mensaje cuando un jugador gana
+
+Notas:
+Este es un código básico que puedes expandir con más características
+
+La lógica de movimiento es simplificada y podría necesitar ajustes
+
+Puedes mejorar la interfaz añadiendo animaciones, sonidos y más detalles visuales
+
+¿Te gustaría que expanda alguna parte específica del código o que añada alguna característica en particular?
+
+## Used as a basic guide for game_interface.py. Works horribly :D
+
+## DEEPSEEK (one chat)
+## Prompt:
+Haceme un código en pygame que sea una pantalla totalmente en blanco, de resolución 2180x720
+## Answer:
+Te ayudo a crear un código en Pygame que muestre una pantalla completamente en blanco con la resolución 2180x720:
+
+python
+import pygame
+import sys
+
+# Inicializar Pygame
+pygame.init()
+
+# Definir la resolución
+ANCHO = 2180
+ALTO = 720
+
+# Crear la ventana
+pantalla = pygame.display.set_mode((ANCHO, ALTO))
+pygame.display.set_caption("Pantalla Blanca - 2180x720")
+
+# Color blanco
+BLANCO = (255, 255, 255)
+
+# Bucle principal del juego
+ejecutando = True
+while ejecutando:
+    # Manejar eventos
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            ejecutando = False
+        # Salir también con la tecla ESC
+        elif evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_ESCAPE:
+                ejecutando = False
+    
+    # Rellenar la pantalla con color blanco
+    pantalla.fill(BLANCO)
+    
+    # Actualizar la pantalla
+    pygame.display.flip()
+
+# Salir de Pygame
+pygame.quit()
+sys.exit()
+Características del código:
+
+Resolución: 2180x720 píxeles exactamente
+
+Color de fondo: Blanco puro (RGB: 255, 255, 255)
+
+Funcionalidades:
+
+Se cierra haciendo clic en la X de la ventana
+
+También se cierra presionando la tecla ESC
+
+Título de ventana descriptivo
+
+Para ejecutar el código necesitas:
+
+Tener Pygame instalado (pip install pygame)
+
+Guardar el código en un archivo .py
+
+Ejecutarlo con Python
+
+Nota: Si tu monitor no soporta la resolución 2180x720, Pygame podría ajustar automáticamente el tamaño de la ventana o mostrar barras negras. La resolución 2180x720 es bastante ancha, así que asegúrate de que tu monitor pueda mostrarla correctamente.
+
+## Prompt:
+
+Bien, ahora dividime ese cuadrante de forma que tenga un margen de 5 pixeles. Ahora, dentro de ese margen, dividí la imagen en 2 de tal forma que el cuadrante izquierdo ocupe dos tercios de la pantalla y que la parte de la derecha ocupe el otro tercio. Por último, la parte más pequeña dividila en 2, tal que tenga un mini cuadrante arriba y otro abajo
+
+## Answer:
+Te ayudo a modificar el código para crear la estructura que describes. Aquí está el código completo:
+
+python
+import pygame
+import sys
+
+# Inicializar Pygame
+pygame.init()
+
+# Definir la resolución
+ANCHO = 2180
+ALTO = 720
+
+# Crear la ventana
+pantalla = pygame.display.set_mode((ANCHO, ALTO))
+pygame.display.set_caption("Pantalla Dividida - 2180x720")
+
+# Colores
+BLANCO = (255, 255, 255)
+NEGRO = (0, 0, 0)
+ROJO = (255, 0, 0)
+VERDE = (0, 255, 0)
+AZUL = (0, 0, 255)
+
+# Márgenes
+MARGEN = 5
+
+# Bucle principal del juego
+ejecutando = True
+while ejecutando:
+    # Manejar eventos
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            ejecutando = False
+        # Salir también con la tecla ESC
+        elif evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_ESCAPE:
+                ejecutando = False
+    
+    # Rellenar toda la pantalla con color blanco
+    pantalla.fill(BLANCO)
+    
+    # Calcular áreas con márgenes
+    # Área total con margen
+    area_total = pygame.Rect(MARGEN, MARGEN, ANCHO - 2*MARGEN, ALTO - 2*MARGEN)
+    
+    # Dividir en izquierda (2/3) y derecha (1/3)
+    ancho_izquierda = (ANCHO - 2*MARGEN) * 2 // 3
+    ancho_derecha = (ANCHO - 2*MARGEN) - ancho_izquierda
+    
+    # Cuadrante izquierdo (2/3 del ancho)
+    cuadrante_izquierdo = pygame.Rect(
+        MARGEN, 
+        MARGEN, 
+        ancho_izquierda, 
+        ALTO - 2*MARGEN
+    )
+    
+    # Cuadrante derecho (1/3 del ancho)
+    cuadrante_derecho = pygame.Rect(
+        MARGEN + ancho_izquierda, 
+        MARGEN, 
+        ancho_derecha, 
+        ALTO - 2*MARGEN
+    )
+    
+    # Dividir el cuadrante derecho en 2 partes iguales (arriba y abajo)
+    alto_mini_cuadrante = (ALTO - 2*MARGEN) // 2
+    
+    # Mini cuadrante superior derecho
+    mini_superior = pygame.Rect(
+        MARGEN + ancho_izquierda, 
+        MARGEN, 
+        ancho_derecha, 
+        alto_mini_cuadrante
+    )
+    
+    # Mini cuadrante inferior derecho
+    mini_inferior = pygame.Rect(
+        MARGEN + ancho_izquierda, 
+        MARGEN + alto_mini_cuadrante, 
+        ancho_derecha, 
+        alto_mini_cuadrante
+    )
+    
+    # Dibujar los cuadrantes con diferentes colores para visualización
+    pygame.draw.rect(pantalla, (200, 200, 255), cuadrante_izquierdo)  # Azul claro
+    pygame.draw.rect(pantalla, (255, 200, 200), mini_superior)        # Rojo claro
+    pygame.draw.rect(pantalla, (200, 255, 200), mini_inferior)        # Verde claro
+    
+    # Dibujar bordes para mejor visualización
+    pygame.draw.rect(pantalla, NEGRO, cuadrante_izquierdo, 2)
+    pygame.draw.rect(pantalla, NEGRO, mini_superior, 2)
+    pygame.draw.rect(pantalla, NEGRO, mini_inferior, 2)
+    
+    # Actualizar la pantalla
+    pygame.display.flip()
+
+# Salir de Pygame
+pygame.quit()
+sys.exit()
+Estructura creada:
+
+Margen general: 5 píxeles alrededor de toda la pantalla
+
+Cuadrante izquierdo: Ocupa 2/3 del ancho disponible (después del margen)
+
+Cuadrante derecho: Ocupa 1/3 del ancho disponible, dividido en:
+
+Mini cuadrante superior: Mitad superior del área derecha
+
+Mini cuadrante inferior: Mitad inferior del área derecha
+
+Características visuales:
+
+Cada área tiene un color diferente para distinguirlas fácilmente
+
+Bordes negros alrededor de cada cuadrante para mejor definición
+
+Los márgenes se mantienen blancos como solicitaste
+
+Si quieres que todas las áreas sean blancas (solo con los bordes para ver la división), simplemente cambia los colores de relleno a BLANCO en las líneas donde se dibujan los rectángulos.
+
+## Used with modifications. Started from 0 the pygame interface to have a more guided and controlled code and conversation, so I can keep on going by myself with most of what's remaining.
+
+## DEEPSEEK
+## Prompt:
+(sent interface and core/ files)
+Estoy haciendo un juego de backgammon con clases, y debo hacer la interfaz con pygame. Por el momento, te paso todas las clases, pero lo que me interesa primero es saber (y sólo saber) cómo asociar cada punta de la 1 a la 24 de board a cada triangulo con su correspondiente índice, a cada campo "Eaten" y "House" (B de Black y W de White) un rectangulito al lado de donde indica cada parte, a cada instancia del atributo checker un circulito del color de la ficha, y poder ejecutar el método set_default_checkers para poder más o menos visualizar la cosa.
+Para cada una de las cosas que te mencioné quiero que:
+1- Me expliques qué es lo que debo hacer
+2- Darme un ejemplo genérico, cortito y simple para entender el concepto
+3- Mostrarme cómo debería implementarlo paso a paso en mi código de pygame
+4- Si hay algún comentario adicional, advertencia, etc, va al final y solamente si es necesario.
+
+Te paso el código de interfaz de consola que hice para que también te guíes por si hay algo que no queda muy claro.
+
+Te ayudo a conectar tu lógica del juego con la interfaz gráfica de Pygame. Voy a explicar cada parte paso a paso:
+
+1. Asociar Puntos del Tablero (1-24) con Triángulos
+Qué debes hacer:
+Mapear cada punto numérico del board (1-24) con las coordenadas y posición visual de los triángulos en Pygame.
+
+Ejemplo genérico:
+python
+# Mapeo de puntos a coordenadas visuales
+point_mapping = {
+    "1": {"x": 100, "y": 500, "direction": "up"},
+    "2": {"x": 150, "y": 500, "direction": "up"},
+    # ... hasta 24
+}
+Implementación paso a paso:
+Paso 1: Crear función de mapeo
+
+python
+def create_point_mapping(board_inner_rect, point_width, point_height):
+    """Crea un diccionario que mapea puntos del board a coordenadas visuales"""
+    point_mapping = {}
+    board_inner = board_inner_rect
+    
+    # Puntos 13-18 (superior izquierda)
+    for i in range(6):
+        point_number = 13 + i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + i * point_width,
+                board_inner.top,
+                point_width,
+                point_height
+            ),
+            "direction": "down"
+        }
+    
+    # Puntos 19-24 (superior derecha)
+    for i in range(6):
+        point_number = 19 + i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + board_inner.width // 2 + i * point_width,
+                board_inner.top,
+                point_width,
+                point_height
+            ),
+            "direction": "down"
+        }
+    
+    # Puntos 12-7 (inferior izquierda)
+    for i in range(6):
+        point_number = 12 - i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + i * point_width,
+                board_inner.top + board_inner.height // 2,
+                point_width,
+                point_height
+            ),
+            "direction": "up"
+        }
+    
+    # Puntos 6-1 (inferior derecha)
+    for i in range(6):
+        point_number = 6 - i
+        point_mapping[str(point_number)] = {
+            "rect": pygame.Rect(
+                board_inner.left + board_inner.width // 2 + i * point_width,
+                board_inner.top + board_inner.height // 2,
+                point_width,
+                point_height
+            ),
+            "direction": "up"
+        }
+    
+    return point_mapping
+Paso 2: Usar el mapeo en el loop principal
+
+python
+# En el while running, después de crear board_inner:
+point_mapping = create_point_mapping(board_inner, point_width, point_height)
+2. Dibujar Checkers en los Puntos
+Qué debes hacer:
+Para cada punto del board, obtener las checkers y dibujarlas en la posición correcta.
+
+Ejemplo genérico:
+python
+# Para un punto con 3 checkers
+for i, checker in enumerate(checkers_list):
+    x = point_rect.centerx
+    y = point_rect.top + 20 * i  # Espaciado vertical
+    color = BLACK if checker.get_colour() == "Black" else WHITE
+    pygame.draw.circle(screen, color, (x, y), 15)
+Implementación paso a paso:
+Paso 1: Función para dibujar checkers en un punto
+
+python
+def draw_checkers_on_point(screen, point_data, checkers, max_display=5):
+    """Dibuja las checkers en un punto específico"""
+    point_rect = point_data["rect"]
+    direction = point_data["direction"]
+    
+    checker_radius = min(point_rect.width // 3, 15)
+    spacing = checker_radius * 2
+    
+    # Determinar dirección de apilamiento
+    if direction == "down":
+        start_y = point_rect.bottom - checker_radius
+        step = -spacing
+    else:  # "up"
+        start_y = point_rect.top + checker_radius
+        step = spacing
+    
+    # Dibujar checkers (máximo max_display)
+    for i, checker in enumerate(checkers[:max_display]):
+        color = BLACK_CHECKER_COLOR if checker.get_colour() == "Black" else WHITE_CHECKER_COLOR
+        y_pos = start_y + i * step
+        
+        pygame.draw.circle(screen, color, (point_rect.centerx, y_pos), checker_radius)
+        # Borde para mejor visibilidad
+        border_color = WHITE if checker.get_colour() == "Black" else BLACK
+        pygame.draw.circle(screen, border_color, (point_rect.centerx, y_pos), checker_radius, 1)
+    
+    # Mostrar contador si hay más checkers de las que caben
+    if len(checkers) > max_display:
+        font = pygame.font.SysFont('Arial', 12, bold=True)
+        count_text = font.render(f"+{len(checkers) - max_display}", True, BLACK)
+        text_rect = count_text.get_rect(center=(point_rect.centerx, start_y + max_display * step))
+        screen.blit(count_text, text_rect)
+Paso 2: Integrar en el loop principal
+
+python
+# Después de dibujar los triángulos, dibujar las checkers
+board_state = game.__board__.get_board()  # Necesitas tener acceso al objeto game
+
+for point_num, point_data in point_mapping.items():
+    checkers_in_point = board_state.get(point_num, [])
+    if checkers_in_point:
+        draw_checkers_on_point(screen, point_data, checkers_in_point)
+3. Áreas para Eaten y House
+Qué debes hacer:
+Definir áreas visuales para mostrar checkers comidas y en casa.
+
+Ejemplo genérico:
+python
+eaten_area = pygame.Rect(x, y, width, height)
+house_area = pygame.Rect(x, y, width, height)
+Implementación paso a paso:
+Paso 1: Definir áreas en los controles de jugadores
+
+python
+# En la sección de controles de jugadores, después de definir black_player_control y white_player_control:
+
+# Áreas para Black Player
+black_eaten_area = pygame.Rect(
+    black_player_control.left + 20,
+    black_player_control.top + 80,
+    black_player_control.width - 40,
+    30
+)
+
+black_house_area = pygame.Rect(
+    black_player_control.left + 20,
+    black_player_control.top + 120,
+    black_player_control.width - 40,
+    30
+)
+
+# Áreas para White Player  
+white_eaten_area = pygame.Rect(
+    white_player_control.left + 20,
+    white_player_control.top + 80,
+    white_player_control.width - 40,
+    30
+)
+
+white_house_area = pygame.Rect(
+    white_player_control.left + 20,
+    white_player_control.top + 120,
+    white_player_control.width - 40,
+    30
+)
+Paso 2: Función para dibujar checkers en áreas especiales
+
+python
+def draw_checkers_in_area(screen, area, checkers, max_display=10):
+    """Dibuja checkers en un área rectangular (para eaten/house)"""
+    if not checkers:
+        return
+    
+    checker_radius = min(area.height // 2 - 2, 12)
+    max_per_row = area.width // (checker_radius * 2)
+    
+    for i, checker in enumerate(checkers[:max_display]):
+        row = i // max_per_row
+        col = i % max_per_row
+        
+        x = area.left + checker_radius + col * (checker_radius * 2)
+        y = area.top + area.height // 2 + row * (checker_radius * 2)
+        
+        # Asegurar que no se salga del área
+        if y + checker_radius > area.bottom:
+            break
+            
+        color = BLACK_CHECKER_COLOR if checker.get_colour() == "Black" else WHITE_CHECKER_COLOR
+        pygame.draw.circle(screen, color, (x, y), checker_radius)
+        border_color = WHITE if checker.get_colour() == "Black" else BLACK
+        pygame.draw.circle(screen, border_color, (x, y), checker_radius, 1)
+    
+    # Mostrar contador si hay más checkers
+    if len(checkers) > max_display:
+        font = pygame.font.SysFont('Arial', 12, bold=True)
+        count_text = font.render(f"+{len(checkers) - max_display}", True, WHITE)
+        text_rect = count_text.get_rect(center=(area.right - 15, area.bottom - 10))
+        screen.blit(count_text, text_rect)
+Paso 3: Integrar en el loop principal
+
+python
+# Dibujar áreas especiales
+pygame.draw.rect(screen, (50, 50, 50), black_eaten_area, 2)
+pygame.draw.rect(screen, (50, 50, 50), black_house_area, 2)
+pygame.draw.rect(screen, (50, 50, 50), white_eaten_area, 2)  
+pygame.draw.rect(screen, (50, 50, 50), white_house_area, 2)
+
+# Dibujar checkers en áreas especiales
+draw_checkers_in_area(screen, black_eaten_area, board_state.get("BEaten", []))
+draw_checkers_in_area(screen, black_house_area, board_state.get("BHouse", []))
+draw_checkers_in_area(screen, white_eaten_area, board_state.get("WEaten", []))
+draw_checkers_in_area(screen, white_house_area, board_state.get("WHouse", []))
+4. Implementación Completa Integrada
+Aquí te muestro cómo integrar todo en tu archivo game_interface.py:
+
+python
+# Al inicio del archivo, importa tu juego
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from core.backgammon_game import BackgammonGame
+
+# Inicializa el juego
+game = BackgammonGame()
+game.set_default_checkers()  # ¡IMPORTANTE! Coloca las checkers en posición inicial
+
+# En el while running, después de definir las áreas visuales:
+
+# 1. Crear mapeo de puntos
+point_mapping = create_point_mapping(board_inner, point_width, point_height)
+
+# 2. Obtener estado del board
+board_state = game.__board__.get_board()
+
+# 3. Dibujar checkers en puntos normales (1-24)
+for point_num, point_data in point_mapping.items():
+    checkers_in_point = board_state.get(point_num, [])
+    if checkers_in_point:
+        draw_checkers_on_point(screen, point_data, checkers_in_point)
+
+# 4. Dibujar checkers en áreas especiales
+draw_checkers_in_area(screen, black_eaten_area, board_state.get("BEaten", []))
+draw_checkers_in_area(screen, black_house_area, board_state.get("BHouse", []))
+draw_checkers_in_area(screen, white_eaten_area, board_state.get("WEaten", []))
+draw_checkers_in_area(screen, white_house_area, board_state.get("WHouse", []))
+Comentarios Adicionales:
+Acceso al objeto game: Necesitas tener el objeto BackgammonGame accesible en tu interfaz gráfica.
+
+Rendimiento: Las funciones que te di son básicas. Para mejor rendimiento, podrías dibujar solo cuando el board cambie.
+
+Coordenadas: Ajusta los tamaños y posiciones según cómo se vea en tu pantalla.
+
+Prueba incremental: Comienza mostrando solo algunos puntos y checkers, luego expande.
+
+¿Te gustaría que profundice en alguna parte específica o que te ayude con la integración completa?
+
+## Used with changes in game_interface. Worked pretty well compared to other AI generated codes. Made some changes to the code in the message.
