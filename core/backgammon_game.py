@@ -5,6 +5,16 @@ from .player import Player
 from .dice import Dice
 from .checker import Checker
 
+# CLASS FOR CREATING 30 INSTANCES OF CHECKERS
+class CheckerFactory:
+    @staticmethod # This allows us to use the method w/o creating an instance of the class.
+    def create_checker_set(colour, start_id, count):
+        """Creates 15 checkers of each colour"""
+        checkers = []
+        for i in range(count):
+            checkers.append(Checker(start_id + i, colour))
+        return checkers
+
 class BackgammonGame:
     """Class with the methods for the logic of the game"""
     # CONSTRUCTOR - sets the main attributes of the class
@@ -15,39 +25,21 @@ class BackgammonGame:
         self.__dice2__ = Dice()
         self.__player1__ = Player("Player 1", "White")
         self.__player2__ = Player("Player 2", "Black")
-        # Creating 15 checkers for each player
-        self.__b_1__ = Checker(1, "Black")
-        self.__b_2__ = Checker(2, "Black")
-        self.__b_3__ = Checker(3, "Black")
-        self.__b_4__ = Checker(4, "Black")
-        self.__b_5__ = Checker(5, "Black")
-        self.__b_6__ = Checker(6, "Black")
-        self.__b_7__ = Checker(7, "Black")
-        self.__b_8__ = Checker(8, "Black")
-        self.__b_9__ = Checker(9, "Black")
-        self.__b_10__ = Checker(10, "Black")
-        self.__b_11__ = Checker(11, "Black")
-        self.__b_12__ = Checker(12, "Black")
-        self.__b_13__ = Checker(13, "Black")
-        self.__b_14__ = Checker(14, "Black")
-        self.__b_15__ = Checker(15, "Black")
-        self.__w_1__ = Checker(16, "White")
-        self.__w_2__ = Checker(17, "White")
-        self.__w_3__ = Checker(18, "White")
-        self.__w_4__ = Checker(19, "White")
-        self.__w_5__ = Checker(20, "White")
-        self.__w_6__ = Checker(21, "White")
-        self.__w_7__ = Checker(22, "White")
-        self.__w_8__ = Checker(23, "White")
-        self.__w_9__ = Checker(24, "White")
-        self.__w_10__ = Checker(25, "White")
-        self.__w_11__ = Checker(26, "White")
-        self.__w_12__ = Checker(27, "White")
-        self.__w_13__ = Checker(28, "White")
-        self.__w_14__ = Checker(29, "White")
-        self.__w_15__ = Checker(30, "White")
+        # FIX: instead of making 30 checkers one by one, we use Checker Factory
+        # SRP principle
+        self.__black_checkers__ = CheckerFactory.create_checker_set("Black", 1, 15)
+        self.__white_checkers__ = CheckerFactory.create_checker_set("White", 16, 15)
+        self.__setup_individual_references()
 
+    def __setup_individual_references(self):
+        """Mantains all the names of the variables"""
+        # For black checkers
+        for i, checker in enumerate(self.__black_checkers__):
+            setattr(self, f"__b_{i+1}__", checker)
 
+        # For white checkers
+        for i, checker in enumerate(self.__white_checkers__):
+            setattr(self, f"__w_{i+1}__", checker)
 
     # ---------- TURNS -------------
     # SETTERS
@@ -115,12 +107,9 @@ class BackgammonGame:
     # It does not return any value.
     def set_default_checkers(self):
         """Method for setting the initial position of the checkers"""
-        white_checkers = [self.__w_1__, self.__w_2__, self.__w_3__, self.__w_4__, self.__w_5__,
-                          self.__w_6__, self.__w_7__, self.__w_8__, self.__w_9__, self.__w_10__,
-                          self.__w_11__, self.__w_12__, self.__w_13__, self.__w_14__, self.__w_15__]
-        black_checkers = [self.__b_1__, self.__b_2__, self.__b_3__, self.__b_4__, self.__b_5__,
-                          self.__b_6__, self.__b_7__, self.__b_8__, self.__b_9__, self.__b_10__,
-                          self.__b_11__, self.__b_12__, self.__b_13__, self.__b_14__, self.__b_15__]
+        # Copy the lists of checkers
+        white_checkers = self.__white_checkers__.copy()
+        black_checkers = self.__black_checkers__.copy()
 
         # Distribución para BLANCAS
         for _ in range(2):
@@ -289,12 +278,13 @@ class BackgammonGame:
         return self.check_eaten_checkers("Black")
 
     # This method receives steps as a parameter.
-    # It returns True if the Black player can move a specific checker to the house and false if he/she can't.
+    # It returns True if the Black player can move a
+    # specific checker to the house and false if he/she can't.
     def _is_valid_black_bear_off(self, origin: str, steps: int) -> bool:
         """Check if the specific black checker can be moved to the house."""
         origin_point = int(origin)
         point_to_check = 25 - steps
-        
+
         # Check if the checker is in the exact point
         if origin_point == point_to_check:
             return True  # Exactly in the point, can be taken out
@@ -360,7 +350,7 @@ class BackgammonGame:
         """Check if the specific white checker can be moved to the house."""
         origin_point = int(origin)
         point_to_check = steps
-        
+
         # Check if the checker is in the exact point
         if origin_point == point_to_check:
             return True  # Exactly in the point, can be taken out
@@ -458,7 +448,7 @@ class BackgammonGame:
     def move_checker(self, origin:str, steps:int):
         """This method moves the checker from origin to destination"""
         destination = self.get_destination_point(origin, steps)
-        
+
         # Moves from eaten fields
         if origin == "BEaten" or origin == "WEaten":
             if self.check_take_out_eaten_checker(steps):
@@ -468,18 +458,18 @@ class BackgammonGame:
                 checker_to_move = self.__board__.remove_checker_from_field(origin)
                 self.__board__.add_checker_to_field(destination, checker_to_move)
             return  # End the method
-        
+
         # Normal case
         if self.check_move_to_house(origin, steps):
             if self.get_turn() == "Black":
                 destination = "BHouse"
             elif self.get_turn() == "White":
                 destination = "WHouse"
-        
+
         if self.check_opponent_checkers(destination):
             if self.check_eatable_checker(destination):
                 self.eat_opponent_checker(destination)
-        
+
         moving_checker = self.__board__.remove_checker_from_field(origin)
         self.__board__.add_checker_to_field(destination, moving_checker)
 
