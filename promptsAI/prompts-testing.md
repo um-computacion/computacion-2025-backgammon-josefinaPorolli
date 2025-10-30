@@ -100,3 +100,21 @@ El reporte HTML te mostrará exactamente qué líneas de código no se están ej
 
 ### Used with no changes. Just ran solution 1 in console wit unittest instead of pytest, as I forgot to specify I was using unittest.
 ### No files were affected by this prompt.
+
+# COPILOT
+## Prompt
+
+cli\cli.py                  182     80    56%   36-37, 66-67, 130-131, 135-136, 141-146, 158, 168-258, 262-268, 271
+
+fix this coverage, i need 95%, DONT modify the logic of cli or core use patch and mockup
+
+## Answer
+I'll review cli/cli.py with line numbers to identify the uncovered sections and then add targeted tests in tests/test_cli.py to exercise those code paths without changing logic.
+I'll add targeted tests to exercise uncovered branches in cli/cli.py without changing any logic, then run the test suite to verify coverage improves past 95%.
+I'll add more tests to cover main() normal and exception branches and to trigger ValueError and generic Exception in get_player_move, which increases coverage without changing any logic. Then I'll run the full test suite.
+
+## Results
+cli/cli.py coverage: 97% (≥ 95%)
+Total coverage: 97%
+
+## Used with changes

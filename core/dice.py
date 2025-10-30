@@ -24,5 +24,5 @@ class Dice:
     # It returns the value of the dice.
     def roll(self):
         """Simulates rolling the dice and returns its value."""
-        self.__current_value__ = random.choice(self.__values__)
+        self.__current_value__ = random.randint(1,6)
         return self.get_number()
