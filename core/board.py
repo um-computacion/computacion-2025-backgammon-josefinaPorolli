@@ -1,5 +1,100 @@
 """Module for class board"""
 
+from abc import ABC, abstractmethod
+from typing import List, Any
+
+class Field(ABC):
+    """Basic interface for each type of field"""
+    
+    # Get the name of the field
+    # Abstaract method indicates that the method will be
+    # inherited by other classes and adapted to each class
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+    
+    # Get the checkers in the field
+    @abstractmethod
+    def get_checkers(self) -> List[Any]:
+        pass
+    
+    # add checkers to the field
+    @abstractmethod
+    def add_checker(self, checker: Any) -> None:
+        pass
+    
+    # remove checkers from field
+    @abstractmethod
+    def remove_checker(self) -> Any:
+        pass
+
+class PointField(Field):
+    """Represents normal points"""
+    
+    def __init__(self, point_number: int):
+        self._name = str(point_number)
+        self._checkers = []
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+
+class HouseField(Field):
+    """Represents House fields"""
+    
+    def __init__(self, color: str):
+        self._name = f"{color}House"
+        self._checkers = []
+        self._color = color
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        # Podemos agregar validaciones específicas para la casa
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+
+class EatenField(Field):
+    """Represents eaten fields"""
+    
+    def __init__(self, color: str):
+        self._name = f"{color}Eaten"
+        self._checkers = []
+        self._color = color
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+
+
 class Board:
     """Class representing the board of the game"""
     # CONSTRUCTOR - sets the attributes of the object
@@ -8,41 +103,27 @@ class Board:
         # The board is a dictionary. Its keys are the points,
         # houses or fields for "dead" checkers and its values are lists with the
         # checkers in the point or field.
-        self.__board__ = {
-            # The board has 24 points, initialized in 0. The ckeckers will be
-            # added in the moment the game starts.
-            "1": [],
-            "2": [],
-            "3": [],
-            "4": [],
-            "5": [],
-            "6": [],
-            "7": [],
-            "8": [],
-            "9": [],
-            "10": [],
-            "11": [],
-            "12": [],
-            "13": [],
-            "14": [],
-            "15": [],
-            "16": [],
-            "17": [],
-            "18": [],
-            "19": [],
-            "20": [],
-            "21": [],
-            "22": [],
-            "23": [],
-            "24": [],
-            # Places where the checkers have to be put in order to win
-            "BHouse": [],
-            "WHouse": [],
-            # Places where the checkers are put in case they are eaten by another
-            "BEaten": [],
-            "WEaten": []
-        }
+        self.__board__ = self._initialize_board()
 
+    def _initialize_board(self) -> dict:
+        """Initialize the board using Field classes"""
+        board = {}
+        
+        # The board has 24 points, initialized in 0. The checkers will be
+        # added in the moment the game starts.
+        for i in range(1, 25):
+            point = PointField(i)
+            board[str(i)] = point.get_checkers()
+        
+        # Places where the checkers have to be put in order to win
+        board["BHouse"] = HouseField("B").get_checkers()
+        board["WHouse"] = HouseField("W").get_checkers()
+        
+        # Places where the checkers are put in case they are eaten by another
+        board["BEaten"] = EatenField("B").get_checkers()
+        board["WEaten"] = EatenField("W").get_checkers()
+        
+        return board
 
     # GETTERS
     # This method does not receive any parameters.
