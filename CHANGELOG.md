@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.7] - 28/10/25
+
+### Changed
+
+- Modified Backgammon Game in order to fulfill SRP principle. Now the responsibilities of making checkers and checking moves are no longer BackgammonGame's.
+
 ## [2.0.6] - 27/10/25
 
 ### Added

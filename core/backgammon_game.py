@@ -351,7 +351,7 @@ class BackgammonGame:
         self.__setup_individual_references()
 
     def __setup_individual_references(self):
-        """Mantains all the names of the variables"""
+        """Mantains all the names of the variables of the checkers"""
         # For black checkers
         for i, checker in enumerate(self.__black_checkers__):
             setattr(self, f"__b_{i+1}__", checker)
