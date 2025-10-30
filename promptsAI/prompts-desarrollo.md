@@ -1519,3 +1519,287 @@ Prueba incremental: Comienza mostrando solo algunos puntos y checkers, luego exp
 ¿Te gustaría que profundice en alguna parte específica o que te ayude con la integración completa?
 
 ## Used with changes in game_interface. Worked pretty well compared to other AI generated codes. Made some changes to the code in the message.
+
+## Deepseek
+## Prompt:
+(Sent board.py file) tengo esta clase y me gustaría poder hacerla extensible cumpliendo con open/closed SOLID. cómo puedo dividir los tipos de campos en points, eaten y house y obtener el mismo resultado?
+## Answer
+Para hacer tu clase Board extensible cumpliendo con el principio Open/Closed de SOLID, puedes utilizar el patrón Strategy o Composition para manejar diferentes tipos de campos. Aquí te propongo una refactorización:
+
+1. Definir una interfaz para los campos
+python
+from abc import ABC, abstractmethod
+from typing import List, Any
+
+class Field(ABC):
+    """Interfaz base para todos los tipos de campos del tablero"""
+    
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+    
+    @abstractmethod
+    def get_checkers(self) -> List[Any]:
+        pass
+    
+    @abstractmethod
+    def add_checker(self, checker: Any) -> None:
+        pass
+    
+    @abstractmethod
+    def remove_checker(self) -> Any:
+        pass
+    
+    @abstractmethod
+    def can_add_checker(self, checker: Any) -> bool:
+        """Valida si se puede agregar un checker a este campo"""
+        pass
+    
+    @abstractmethod
+    def can_remove_checker(self) -> bool:
+        """Valida si se puede remover un checker de este campo"""
+        pass
+2. Implementar los diferentes tipos de campos
+python
+class PointField(Field):
+    """Representa un punto normal en el tablero (1-24)"""
+    
+    def __init__(self, point_number: int):
+        self._name = str(point_number)
+        self._checkers = []
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+    
+    def can_add_checker(self, checker: Any) -> bool:
+        # En puntos normales generalmente se pueden agregar checkers
+        return True
+    
+    def can_remove_checker(self) -> bool:
+        return len(self._checkers) > 0
+
+class HouseField(Field):
+    """Representa la casa donde los checkers van para ganar"""
+    
+    def __init__(self, color: str):
+        self._name = f"{color}House"
+        self._checkers = []
+        self._color = color
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        # Podemos agregar validaciones específicas para la casa
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+    
+    def can_add_checker(self, checker: Any) -> bool:
+        # Validar que solo checkers del color correcto pueden entrar
+        # Asumiendo que el checker tiene un método get_color()
+        return hasattr(checker, 'get_color') and checker.get_color() == self._color
+    
+    def can_remove_checker(self) -> bool:
+        # Generalmente no se pueden remover checkers de la casa
+        return False
+
+class EatenField(Field):
+    """Representa el campo donde van los checkers comidos"""
+    
+    def __init__(self, color: str):
+        self._name = f"{color}Eaten"
+        self._checkers = []
+        self._color = color
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+    
+    def can_add_checker(self, checker: Any) -> bool:
+        # Solo checkers del color opuesto deberían poder ser comidos
+        # Esta lógica puede ajustarse según las reglas del juego
+        return hasattr(checker, 'get_color') and checker.get_color() != self._color
+    
+    def can_remove_checker(self) -> bool:
+        return len(self._checkers) > 0
+3. Refactorizar la clase Board
+python
+class Board:
+    """Class representing the board of the game - Refactored for Open/Closed"""
+    
+    def __init__(self):
+        self._fields = self._initialize_fields()
+    
+    def _initialize_fields(self) -> dict:
+        """Initialize all fields using the Field interface"""
+        fields = {}
+        
+        # Puntos normales (1-24)
+        for i in range(1, 25):
+            point_field = PointField(i)
+            fields[point_field.get_name()] = point_field
+        
+        # Casas
+        black_house = HouseField("B")
+        white_house = HouseField("W")
+        fields[black_house.get_name()] = black_house
+        fields[white_house.get_name()] = white_house
+        
+        # Campos de checkers comidos
+        black_eaten = EatenField("B")
+        white_eaten = EatenField("W")
+        fields[black_eaten.get_name()] = black_eaten
+        fields[white_eaten.get_name()] = white_eaten
+        
+        return fields
+    
+    # GETTERS
+    def get_board(self) -> dict:
+        """Getter for the board - returns dictionary with field names and checkers"""
+        return {name: field.get_checkers() for name, field in self._fields.items()}
+    
+    def get_checkers_in_field(self, field_name: str) -> list:
+        """Getter for the checkers in a specific field"""
+        if field_name not in self._fields:
+            raise ValueError(f"Field {field_name} does not exist")
+        return self._fields[field_name].get_checkers()
+    
+    # GETTERS FOR SPECIFIC FIELD TYPES
+    def get_points(self) -> dict:
+        """Getter for all points on the board"""
+        return {name: field.get_checkers() for name, field in self._fields.items() 
+                if isinstance(field, PointField)}
+    
+    def get_houses(self) -> dict:
+        """Getter for both houses"""
+        return {name: field.get_checkers() for name, field in self._fields.items() 
+                if isinstance(field, HouseField)}
+    
+    def get_eaten_fields(self) -> dict:
+        """Getter for both eaten fields"""
+        return {name: field.get_checkers() for name, field in self._fields.items() 
+                if isinstance(field, EatenField)}
+    
+    # FIELD OPERATIONS
+    def add_checker_to_field(self, field_name: str, checker: Any) -> None:
+        """Add checker to a specific field with validation"""
+        if field_name not in self._fields:
+            raise ValueError(f"Field {field_name} does not exist")
+        
+        field = self._fields[field_name]
+        if not field.can_add_checker(checker):
+            raise ValueError(f"Cannot add checker to field {field_name}")
+        
+        field.add_checker(checker)
+    
+    def remove_checker_from_field(self, field_name: str) -> Any:
+        """Remove checker from a specific field with validation"""
+        if field_name not in self._fields:
+            raise ValueError(f"Field {field_name} does not exist")
+        
+        field = self._fields[field_name]
+        if not field.can_remove_checker():
+            raise ValueError(f"Cannot remove checker from field {field_name}")
+        
+        return field.remove_checker()
+    
+    # EXTENSIBILITY METHODS
+    def add_field(self, field: Field) -> None:
+        """Add a new field type to the board - Open for extension"""
+        self._fields[field.get_name()] = field
+    
+    def remove_field(self, field_name: str) -> None:
+        """Remove a field from the board"""
+        if field_name in self._fields:
+            del self._fields[field_name]
+    
+    def get_field(self, field_name: str) -> Field:
+        """Get the field object by name"""
+        return self._fields.get(field_name)
+    
+    def get_fields_by_type(self, field_type: type) -> dict:
+        """Get all fields of a specific type"""
+        return {name: field for name, field in self._fields.items() 
+                if isinstance(field, field_type)}
+4. Ejemplo de uso y extensión
+python
+# Crear un nuevo tipo de campo sin modificar Board
+class SpecialField(Field):
+    """Un campo especial con reglas personalizadas"""
+    
+    def __init__(self, name: str, max_checkers: int):
+        self._name = name
+        self._checkers = []
+        self._max_checkers = max_checkers
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_checkers(self) -> List[Any]:
+        return self._checkers.copy()
+    
+    def add_checker(self, checker: Any) -> None:
+        if len(self._checkers) >= self._max_checkers:
+            raise ValueError("Field is full")
+        self._checkers.append(checker)
+    
+    def remove_checker(self) -> Any:
+        if not self._checkers:
+            raise IndexError("No checkers to remove")
+        return self._checkers.pop()
+    
+    def can_add_checker(self, checker: Any) -> bool:
+        return len(self._checkers) < self._max_checkers
+    
+    def can_remove_checker(self) -> bool:
+        return len(self._checkers) > 0
+
+# Uso del nuevo campo sin modificar Board
+board = Board()
+special_field = SpecialField("Special1", 3)
+board.add_field(special_field)
+
+# Ahora podemos usar el nuevo campo normalmente
+board.add_checker_to_field("Special1", some_checker)
+Ventajas de esta refactorización:
+Open/Closed: La clase Board está cerrada para modificación pero abierta para extensión
+
+Separación de responsabilidades: Cada tipo de campo maneja su propia lógica
+
+Flexibilidad: Puedes agregar nuevos tipos de campos sin modificar el código existente
+
+Mantenibilidad: El código es más fácil de testear y mantener
+
+Type Safety: Mejor tipado y validaciones
+
+Esta estructura te permite agregar nuevos tipos de campos (como campos de poder, campos especiales, etc.) simplemente creando nuevas clases que implementen la interfaz Field, sin necesidad de modificar la clase Board.
+
+## Used with changes in Board. The code sent was not even close to what I actually needed but it gave me an idea of how to implement the principle.
