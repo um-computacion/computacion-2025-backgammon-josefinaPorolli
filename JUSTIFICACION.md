@@ -171,6 +171,13 @@ La clase debe tener una instancia del tablero actual para coordinar lo que serí
 La clase debe tener una instancia del juego en general, con la gestión de turnos, el tablero, las fichas y los dados principalmente.
 
 # Decisiones de diseño relevantes
+
+- En la interfaz gráfica, se usó puro renderizado, sin imágenes dado que no encontré ninguna forma de incluir imágenes de dados o de fichas y que me gustara cómo quedaba. Puede ser una iterfaz pesada para algunos dispositivos, pero por suerte tenemos la interfaz de líneas de comando :)
+- Inicialmente, se iba a usar la posición en memoria de la instancia de la clase Checker como identificador. Eventualmente, recapacité y me di cuenta de que puede que el usuario deba suspender el programa o la propia computadora, y el swap entre memoria virtual y principal no garantiza que la ficha que necesitamos vuelva siempre (o incluso se mantenga) en la misma posición de memoria principal.
+- Durante un tiempo consideré que cada campo del tablero en realidad fuera una lista del color de las fichas que tiene (si es que tiene fichas) y la cantidad de fichas que haya, pero si lo hubeiese hecho de esa forma, la clase Checker no habría tenido razón de ser.
+- En lugar de hacer 30 instancias de la clase Checker (como hice en un momento), se creó la clase CkeckerFactory con el método create_checker_set que crea dichas instancias y las agrega a una lista para mayor organización y de paso, que a Pylint le guste más.
+- Los múltiples métodos usados para validación de movimientos, no solamente se hicieron de la manera en la que se hicieron para que Pylint estuviera contento, sino que también garantiza un código muchísimo más organizado y mucho más acorde al diagrama de flujo.
+
 # Excepciones y manejo de errores
 # Estrategias de testing y cobertura
 # Referencias a requisitos SOLID y cómo se cumplen
@@ -305,6 +312,17 @@ The class must have an instance of the current board to coordinate what would be
 The class must have an instance of the game in general, with the management of turns, the board, the checkers, and the dice primarily.
 
 # Relevant design decisions
+
+- In the graphical interface, pure rendering was used, without images, since I couldn't find a way to include images of dice or checkers that I liked how it looked. It might be a heavy interface for some devices, but luckily we have the command-line interface :)
+
+- Initially, the memory address of the Checker class instance was going to be used as an identifier. Eventually, I reconsidered and realized that the user might need to suspend the program or the computer itself, and the swap between virtual and main memory does not guarantee that the checker we need will always return to (or even remain in) the same main memory location.
+
+- For a while, I considered making each board field simply a list containing the color of the checkers it holds (if it has any) and the number of checkers present. However, if I had done it that way, the Checker class would have had no reason to exist.
+
+- Instead of creating 30 instances of the Checker class directly (as I did at one point), the CheckerFactory class was created with the create_checker_set method. This method creates those instances and adds them to a list for better organization, and also to make Pylint happier.
+
+- The multiple methods used for move validation were implemented not only to keep Pylint satisfied but also to ensure much more organized code that better follows the flow diagram.
+
 # Exceptions and error handling
 # Testing and coverage strategies
 # References to SOLID requirements and how they are met
