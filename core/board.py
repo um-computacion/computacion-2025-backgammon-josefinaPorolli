@@ -18,15 +18,15 @@ class Field(ABC):
     def get_checkers(self) -> List[Any]:
         pass
     
-    # add checkers to the field
-    @abstractmethod
-    def add_checker(self, checker: Any) -> None:
-        pass
+    # # add checkers to the field
+    # @abstractmethod
+    # def add_checker(self, checker: Any) -> None:
+    #     pass
     
-    # remove checkers from field
-    @abstractmethod
-    def remove_checker(self) -> Any:
-        pass
+    # # remove checkers from field
+    # @abstractmethod
+    # def remove_checker(self) -> Any:
+    #     pass
 
 class PointField(Field):
     """Represents normal points"""
@@ -40,14 +40,6 @@ class PointField(Field):
     
     def get_checkers(self) -> List[Any]:
         return self.__checkers__.copy()
-    
-    def add_checker(self, checker: Any) -> None:
-        self.__checkers__.append(checker)
-    
-    def remove_checker(self) -> Any:
-        if not self.__checkers__:
-            raise IndexError("No checkers to remove")
-        return self.__checkers__.pop()
 
 class HouseField(Field):
     """Represents House fields"""
@@ -62,15 +54,6 @@ class HouseField(Field):
     
     def get_checkers(self) -> List[Any]:
         return self.__checkers__.copy()
-    
-    def add_checker(self, checker: Any) -> None:
-        # Podemos agregar validaciones específicas para la casa
-        self.__checkers__.append(checker)
-    
-    def remove_checker(self) -> Any:
-        if not self.__checkers__:
-            raise IndexError("No checkers to remove")
-        return self.__checkers__.pop()
 
 class EatenField(Field):
     """Represents eaten fields"""
@@ -85,15 +68,6 @@ class EatenField(Field):
     
     def get_checkers(self) -> List[Any]:
         return self.__checkers__.copy()
-    
-    def add_checker(self, checker: Any) -> None:
-        self.__checkers__.append(checker)
-    
-    def remove_checker(self) -> Any:
-        if not self.__checkers__:
-            raise IndexError("No checkers to remove")
-        return self.__checkers__.pop()
-
 
 class Board:
     """Class representing the board of the game"""

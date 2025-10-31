@@ -180,6 +180,31 @@ La clase debe tener una instancia del juego en general, con la gestión de turno
 
 # Excepciones y manejo de errores
 # Estrategias de testing y cobertura
+
+El objetivo de testear el código, es mantener una garantía de que el mismo funciona como se espera. Dichos tesets fueron hechos con Unittest para todos los métodos de todas las clases de core/ y la interfaz de líneas de comando.
+A pesar de que si un método llama a otro y se testea únicamente el método "padre" (siempre y cuando se cause justamente ese llamado al hacer el test), ese método al que se llama queda cubierto, por cuestiones de debug, se ha intentado testear todos los métodos posibles.
+Coverage es el encargado de evaluar qué porcentaje del código es testeado y cuál no.
+Existen en total 56 tests del código en todo el proyecto y la cobertura es la siguiente:
+
+```
+Name                      Stmts   Miss  Cover
+---------------------------------------------
+cli\cli.py                  182      6    97%
+core\backgammon_game.py     258      4    98%
+core\board.py                56      5    91%
+core\checker.py               8      0   100%
+core\dice.py                 10      0   100%
+core\player.py               12      0   100%
+---------------------------------------------
+TOTAL                       526     15    97%
+```
+
+El requisito era de una cobertira del 90% como mínimo. Como se puede ver, la cobertura total es de un 7% más que el requerido.
+
+Para testear Dice, se usó Mock, dado que no podemos predecir el valor que saldrá en el dado al momento de tirarlo. Mock obliga a random a retornar un valor específico con la finalidad de que el test pueda quedar cubierto.
+
+Por otro lado, para testear la interfaz de líneas de comando, se usó @patch. Esta utilidad le da un valor seleccionado por nosotros para asignarle un valor a un input para poder ejecutar el test.
+
 # Referencias a requisitos SOLID y cómo se cumplen
 # Anexos: diagramas UML
 
@@ -314,16 +339,39 @@ The class must have an instance of the game in general, with the management of t
 # Relevant design decisions
 
 - In the graphical interface, pure rendering was used, without images, since I couldn't find a way to include images of dice or checkers that I liked how it looked. It might be a heavy interface for some devices, but luckily we have the command-line interface :)
-
 - Initially, the memory address of the Checker class instance was going to be used as an identifier. Eventually, I reconsidered and realized that the user might need to suspend the program or the computer itself, and the swap between virtual and main memory does not guarantee that the checker we need will always return to (or even remain in) the same main memory location.
-
 - For a while, I considered making each board field simply a list containing the color of the checkers it holds (if it has any) and the number of checkers present. However, if I had done it that way, the Checker class would have had no reason to exist.
-
 - Instead of creating 30 instances of the Checker class directly (as I did at one point), the CheckerFactory class was created with the create_checker_set method. This method creates those instances and adds them to a list for better organization, and also to make Pylint happier.
-
 - The multiple methods used for move validation were implemented not only to keep Pylint satisfied but also to ensure much more organized code that better follows the flow diagram.
 
 # Exceptions and error handling
 # Testing and coverage strategies
+
+The goal of testing the code is to maintain a guarantee that it functions as expected. These tests were written using Unittest for all methods of all classes in core/ and the command-line interface.
+
+Although if one method calls another and only the "parent" method is tested (provided that call is specifically triggered during the test), the called method becomes covered. However, for debugging purposes, we have attempted to test all possible methods.
+
+Coverage is responsible for evaluating what percentage of the code is tested and what is not.
+There are a total of 56 tests for the code throughout the project, and the coverage is as follows:
+
+```
+Name                      Stmts   Miss  Cover
+---------------------------------------------
+cli\cli.py                  182      6    97%
+core\backgammon_game.py     258      4    98%
+core\board.py                56      5    91%
+core\checker.py               8      0   100%
+core\dice.py                 10      0   100%
+core\player.py               12      0   100%
+---------------------------------------------
+TOTAL                       526     15    97%
+```
+
+The requirement was a minimum coverage of 90%. As can be seen, the total coverage is 7% higher than required.
+
+To test Dice, Mock was used, since we cannot predict the value that will appear on the die when rolled. Mock forces random to return a specific value so that the test can be covered.
+
+On the other hand, to test the command-line interface, @patch was used. This utility allows us to assign a value of our choice to an input in order to execute the test.
+
 # References to SOLID requirements and how they are met
 # Annexes: UML diagrams
