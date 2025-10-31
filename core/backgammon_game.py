@@ -348,9 +348,9 @@ class BackgammonGame:
         self.__black_checkers__ = CheckerFactory.create_checker_set("Black", 1, 15)
         self.__white_checkers__ = CheckerFactory.create_checker_set("White", 16, 15)
         self.__move_validator__ = CheckMoves(self.__board__, self)
-        self.__setup_individual_references()
+        self.__setup_individual_references__()
 
-    def __setup_individual_references(self):
+    def __setup_individual_references__(self):
         """Mantains all the names of the variables of the checkers"""
         # For black checkers
         for i, checker in enumerate(self.__black_checkers__):

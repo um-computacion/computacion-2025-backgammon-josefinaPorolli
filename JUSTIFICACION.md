@@ -34,7 +34,7 @@ Es necesario tener en cuenta el archivo requirements.txt es sumamente importante
 
 ## Player (Jugador)
 
-Clase que representa cada uno de los jugadores. Esta clase tiene principalmente la finalidad de gestionar los turnos, de asignarle a cada jugador un color y mantener el nombre ingresado por el usuario para una mejor experiencia. Dichos atributos pueden ser tanto asignados como modificados como obtenidos. En el juego hay 2 jugadores.
+Clase que representa cada uno de los jugadores. Esta clase tiene principalmente la finalidad dar la posibilidad de de gestionar los turnos, de asignarle a cada jugador un color y mantener el nombre ingresado por el usuario para una mejor experiencia. Dichos atributos pueden ser tanto asignados como modificados como obtenidos. En el juego hay 2 jugadores.
 
 ## Dice (dado)
 
@@ -77,6 +77,99 @@ Con la finalidad de no crear 30 instancias de la clase Checker en BackgammonGame
 La tarea de chequear si los movimientos son válidos antes de hacerlos, en realidad es una tarea bastante pesada y no debería ser responsabilidad de BackgammonGame. Esta clase implementa varios métodos basados en el reglamento del juego para validar si el movimiento que se está intentando hacer es válido y acorde a las reglas o no.
 
 # Justificación de atributos
+
+## Player:
+
+### __name__
+
+Atributo que contiene el nombre del jugador. Al inicio del juego, se les pregunta el nombre a cada uno de los jugadores para incluirlos en el juego.
+
+### __colour__
+
+Color de fichas que tiene asignado cada jugador. Ejemplo: Pepe juega con las fichas negras y Juan con las fichas blancas.
+
+## Dice:
+
+### __values__
+
+Atributo que establece los posibles valores del dado. Para el juego siempre será un dado de 6 lados. Este atributo más que para el desarrollo del juego, en realidad sirve para los tests.
+
+### __current_value__
+
+Atributo que guarda en memoria el valor actual del dado. Si lo pasamos a una analogía física, luego de tirar el dado es el valor de la cara del dado que apunta hacia arriba.
+
+## Checker:
+
+### __checker_id__
+
+Identificador único de cada ficha. Inicialmente pensaba asociarlo a la posición en memoria de la variable, pero luego pensé que el usuario tranquilamente podría suspender la computadora o cualquier cosa relacionada al programa, al sacarla de la suspensión y enviar el dato de vuelta a la memoria principal, el identificador de la posición de memoria podría cambiar.
+
+### __colour__
+
+Color asignado a cada ficha. Como dijimos antes, cada jugador tiene 15 fichas del color que le toca y únicamente puede manipular las fichas del color que tiene asignado.
+
+## Board
+
+### __board__
+
+El único atributo que tiene la clase Board en realidad es un diccionario donde cada lugar posible donde se puedan poner fichas, tiene un nombre, que sería la key del diccionario. En el value de cada uno de estos campos, es una lista que dentro tiene elementos de la clase Checker.
+
+## PointField, EatenField, HouseField
+
+Las tres clases, las cuales son hijas de la clase Field, tienen los mismos atributos y son los siguientes:
+
+### __name__
+
+Nombre del campo. Desde el punto de vista del tablero se vería como las key del diccionario
+
+### __checkers__
+
+Lista de elementos de la clase Checker, que representará las fichas que están actualmente en el campo o punta.
+
+### __colour__ (solo para campos especiales)
+
+Dependiendo de si el color se asigna con B (de black) o con W (de white), se le asigna a cada jugador un campo del tipo. Además, dependiendo del color, se asigna el nombre al campo. En estos casos, __name__ depende de __colour__.
+
+## BackgammonGame
+
+### __turn__
+
+Indica cuál es el jugador (asignado con el color) al cual le toca jugar. Si el turno es, por ejemplo, del blanco y se intenta mover una ficha negra, se le dice al usuario que el movimiento es inválido.
+
+### __board__
+
+Instancia de la clase Board. Es el tablero del juego.
+
+### __dice1__ y __dice2__
+
+Instancias de la clase Dice. Representan los dados principales del juego. Si los dados salen iguales durante el juego, en lugar de usar dos dados de más, simplemente se utiliza el valor del dado 1 y se "simula" como si se tuvieran en realidad 4 dados con el mismo valor.
+
+### __player1__ y __player2__
+
+Instancias de la clase Player. Representan a cada uno de los jugadores con su nombre y el color asignado. El primer jugador será el que juegue con las fichas negras y el segundo, el que juegue con las blancas.
+
+### __black_checkers__ y __white_checkers__
+
+Listas de fichas blancas y negras. Estas fichas son creadas con la clase CheckerFactory y luego los nombres de las variables para cada instancia de Checker (que esto ocurre porque ya había hecho prácticamente todo el código con los nombres de variables :/) son asignados con __setup_individual_references__.
+
+### __move_validator__
+
+Instancia de la clase CheckMoves. Es básicamente una sección del código que sirve como el "cerebro" o "director" que determina si los movimientos que se quieren hacer son válidos.
+
+## CheckerFactory
+
+No tiene atributos. Solamente se ha definido a esta clase para asignarle un método estático. Un método estático es un método que puede usarse sin necesariamente crear una instancia de una clase.
+
+## CheckMoves
+
+### __board__
+
+La clase debe tener una instancia del tablero actual para coordinar lo que serían los movimientos válidos y los no válidos dependiendo del estado actual del mismo.
+
+### __game__
+
+La clase debe tener una instancia del juego en general, con la gestión de turnos, el tablero, las fichas y los dados principalmente.
+
 # Decisiones de diseño relevantes
 # Excepciones y manejo de errores
 # Estrategias de testing y cobertura
@@ -109,7 +202,108 @@ To summarize it briefly, there are 4 classes that are "the parts of a table" for
 Take into consideration that requirements.txt file is truly important when using the game the first time, since it has everything that must be installed in order to be able to execute the code.
 
 # Justification of the chosen classes
+
+## Player
+Class that represents each of the players. The main purpose of this class is to give the game a way to manage turns, assign each player a color, and maintain the name entered by the user for a better experience. These attributes can be assigned, modified, and retrieved. There are 2 players in the game.
+
+## Dice
+Class that represents each of the dice. It contains the possible outcomes (since it's a D6, only integer values from 1 to 6 can appear) and the current value, considering it represents what in real life would be the face pointing upwards after being rolled. There are primarily 2 dice in the game. For optimization reasons, even though getting two dice with equal values is considered as if there were four dice of the same value, we simply use two. The current value of the die can be modified by a random number among the valid ones using the roll() method, which simulates a dice throw, and it can also be retrieved.
+
+## Checker
+Class that represents each game piece/token. Each player will have 15 assigned white or black checkers to play with. Each checker has an identifier and an assigned color. The identifier and color of each checker can only be retrieved using the getters. They cannot be modified or deleted, as they will always have the same values throughout the game.
+
+## Board
+Class that represents the physical board with its points and its special fields, such as the fields for the homes and the eaten pieces of each player. This class can add checkers to a field, remove them from a field, return the checkers in a specific field, and return the entire board.
+
+### Field
+This class represents each possible field on the board. The board fields can be of different types (Eaten, House, point), so the open/closed principle was applied (open for extension, closed for modification). This way, even though the game rules are already written, it's a convenient way to allow more field types to be added. This is the parent class of the following 3 classes:
+
+### PointField (Point)
+This class is a type of field that can be on the board. The points are the triangles within the main area of the board where the players' checkers interact. Each point, in the traditional game, is represented as a triangle. In total, there are 24 points on the board.
+
+### HouseField (Home)
+This class is the type of field that stores each player's checkers and determines whether they win the game or not. Once a player has all their checkers in their home quadrant, they can start bearing off their checkers under certain conditions, and the first player to successfully bear off all 15 of their checkers is the winner.
+
+### EatenField (Eaten checkers or on the Bar)
+This class is the type of field where pieces that are "eaten" by the opponent are placed. Yes, I used 'eaten' to add personality because I love Latin American idioms. In summary, when there is only one of my pieces on a point and the opponent places their piece on top of mine, they "eat" my piece and I must re-enter it. In the traditional game, they are usually placed on the central bar of the board, but both to simplify and for the "personality" of this field, I decided to place it on the side of the board, like the pieces in the homes.
+
+### BackgammonGame (Backgammon Game Logic)
+Class that manages the general game logic. It groups turn management, dice values, moves, the initial placement of checkers on the points, and their movements. To comply with the SRP principle, two classes were created for the initial setup of the checkers and move validation.
+
+### CheckerFactory
+With the purpose of not creating 30 instances of the Checker class in BackgammonGame, this task is delegated to CheckerFactory. Initially, these instances were created one by one as an attribute of the BackgammonGame class, until I realized that neither Pylint nor I liked it, and besides, it was horribly implemented. This is why this task is delegated to this class.
+
+### CheckMoves
+The task of checking if moves are valid before making them is actually quite a heavy task and should not be the responsibility of BackgammonGame. This class implements several methods based on the game rules to validate whether the move being attempted is valid and according to the rules or not.
+
 # Justification of attributes
+
+## Player:
+### __name__
+Attribute that contains the player's name. At the start of the game, each player is asked for their name to include them in the game.
+
+### __colour__
+The color of the checkers assigned to each player. Example: Pepe plays with the black checkers and Juan with the white checkers.
+
+## Dice:
+### __values__
+Attribute that defines the possible values of the die. For the game, it will always be a 6-sided die. This attribute is more useful for testing than for the actual game development.
+
+### __current_value__
+Attribute that stores the current value of the die in memory. Using a physical analogy, after rolling the die, this is the value on the face pointing upwards.
+
+## Checker:
+### __checker_id__
+Unique identifier for each checker. Initially, I considered associating it with the memory address of the variable, but then I thought that the user could easily put the computer to sleep or anything related to the program; when resuming from sleep and sending the data back to main memory, the memory address identifier could change.
+
+### __colour__
+Color assigned to each checker. As mentioned before, each player has 15 checkers of their assigned color and can only manipulate the checkers of the color assigned to them.
+
+## Board
+### __board__
+The only attribute the Board class actually has is a dictionary where each possible location where checkers can be placed has a name, which would be the key of the dictionary. The value for each of these fields is a list containing elements of the Checker class.
+
+## PointField, EatenField, HouseField
+These three classes, which are children of the Field class, have the same attributes, which are as follows:
+
+### __name__
+Name of the field. From the board's perspective, it would be seen as the dictionary keys.
+
+### __checkers__
+List of elements of the Checker class, representing the checkers currently in the field or point.
+
+### __colour__ (only for special fields)
+Depending on whether the color is assigned as 'B' (for black) or 'W' (for white), each player is assigned a field of that type. Furthermore, depending on the color, the name is assigned to the field. In these cases, __name__ depends on __colour__.
+
+## BackgammonGame
+### __turn__
+Indicates which player (assigned by color) has the current turn. If it's the white player's turn, for example, and an attempt is made to move a black checker, the user is told that the move is invalid.
+
+### __board__
+Instance of the Board class. It is the game board.
+
+### __dice1__ and __dice2__
+Instances of the Dice class. They represent the main dice of the game. If the dice show the same value during the game, instead of using two extra dice, the value of dice1 is simply used and it's "simulated" as if there were actually 4 dice with the same value.
+
+### __player1__ and __player2__
+Instances of the Player class. They represent each of the players with their name and assigned color. The first player will be the one playing with the black checkers and the second, the one playing with the white checkers.
+
+### __black_checkers__ and __white_checkers__
+Lists of black and white checkers. These checkers are created using the CheckerFactory class, and then the variable names for each Checker instance (this happens because I had already written almost all the code with the variable names :/) are assigned using __setup_individual_references__.
+
+### __move_validator__
+Instance of the CheckMoves class. It is basically a section of code that serves as the "brain" or "director" that determines whether the moves you want to make are valid.
+
+## CheckerFactory
+Has no attributes. This class was defined solely to assign a static method to it. A static method is a method that can be used without necessarily creating an instance of a class.
+
+## CheckMoves
+### __board__
+The class must have an instance of the current board to coordinate what would be valid and invalid moves depending on its current state.
+
+### __game__
+The class must have an instance of the game in general, with the management of turns, the board, the checkers, and the dice primarily.
+
 # Relevant design decisions
 # Exceptions and error handling
 # Testing and coverage strategies
