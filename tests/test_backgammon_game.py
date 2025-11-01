@@ -1,9 +1,5 @@
-"""Module for testing the Backgammon Game class
+"""Module for testing the Backgammon Game class"""
 
-Notes:
-- Pylint false-positives for private attributes and dynamic members are
-    disabled for this test module to avoid changing the production API.
-"""
 import unittest
 from unittest.mock import Mock
 from core.backgammon_game import BackgammonGame

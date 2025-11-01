@@ -194,16 +194,17 @@ Existen en total 56 tests del código en todo el proyecto y la cobertura es la s
 Name                      Stmts   Miss  Cover
 ---------------------------------------------
 cli\cli.py                  182      6    97%
-core\backgammon_game.py     258      4    98%
-core\board.py                56      5    91%
+core\backgammon_game.py     279      4    99%
+core\board.py                54      3    94%
 core\checker.py               8      0   100%
-core\dice.py                 10      0   100%
-core\player.py               12      0   100%
+core\dice.py                 16      0   100%
+core\exceptions.py           10      0   100%
+core\player.py               22      0   100%
 ---------------------------------------------
-TOTAL                       526     15    97%
+TOTAL                       571     13    98%
 ```
 
-El requisito era de una cobertira del 90% como mínimo. Como se puede ver, la cobertura total es de un 7% más que el requerido.
+El requisito era de una cobertira del 90% como mínimo. Como se puede ver, la cobertura total es de un 8% más que el requerido.
 
 Para testear Dice, se usó Mock, dado que no podemos predecir el valor que saldrá en el dado al momento de tirarlo. Mock obliga a random a retornar un valor específico con la finalidad de que el test pueda quedar cubierto.
 
@@ -400,16 +401,17 @@ There are a total of 56 tests for the code throughout the project, and the cover
 Name                      Stmts   Miss  Cover
 ---------------------------------------------
 cli\cli.py                  182      6    97%
-core\backgammon_game.py     258      4    98%
-core\board.py                56      5    91%
+core\backgammon_game.py     279      4    99%
+core\board.py                54      3    94%
 core\checker.py               8      0   100%
-core\dice.py                 10      0   100%
-core\player.py               12      0   100%
+core\dice.py                 16      0   100%
+core\exceptions.py           10      0   100%
+core\player.py               22      0   100%
 ---------------------------------------------
-TOTAL                       526     15    97%
+TOTAL                       571     13    98%
 ```
 
-The requirement was a minimum coverage of 90%. As can be seen, the total coverage is 7% higher than required.
+The requirement was a minimum coverage of 90%. As can be seen, the total coverage is 8% higher than required.
 
 To test Dice, Mock was used, since we cannot predict the value that will appear on the die when rolled. Mock forces random to return a specific value so that the test can be covered.
 

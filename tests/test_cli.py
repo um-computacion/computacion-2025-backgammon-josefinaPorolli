@@ -58,8 +58,9 @@ class TestBackgammonCLI(unittest.TestCase):  # pylint: disable=too-many-public-m
         self.assertIn("DOUBLES!", output)
         self.assertIn("4 moves", output)
 
+    @patch('sys.stdout', new_callable=StringIO)
     @patch("builtins.input")
-    def test_get_player_names_valid_input(self, mock_input):
+    def test_get_player_names_valid_input(self, mock_input, mock_stdout):
         """It should accept valid player names.
 
         Args:
