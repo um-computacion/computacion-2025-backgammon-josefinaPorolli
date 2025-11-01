@@ -1,5 +1,26 @@
 """Module for class Player"""
 
+from abc import ABC, abstractmethod
+
+class IPlayer(ABC):
+    """Player abstracion"""
+    
+    @abstractmethod
+    def set_name(self, name: str) -> None:
+        pass
+    
+    @abstractmethod
+    def set_colour(self, colour: str) -> None:
+        pass
+    
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+    
+    @abstractmethod
+    def get_colour(self) -> str:
+        pass
+
 class Player:
     """Class representing a player in the game"""
     # CONSTRUCTOR

@@ -15,7 +15,7 @@ Algunas partes importantes a tener en cuenta respecto a este proyecto son:
 - Unittest para testeo de funcionamiento de los métodos de las clases usadas y la interfaz CLI.
 - Coverage para reportes sobre dichos tests hechos con Unittest.
 - Pylint para testeo de calidad del código
-- Github action
+- Github action para integración continua
 
 Para resumirlo muy brevemente, existen 4 clases que serían como "las partes de una mesa" para el armado del juego: board (tablero), checkers (fichas), dice (dado) y player (jugador). Luego, está la clase BackgammonGame que unifica dichas clases para gestionar la lógica del juego: inicialización, manejo de turnos, validación de movimientos y movimientos en sí, entre otros aspectos. Esta última es la única clase que se comunica de forma directa con las interfaces, de las cuales existen una de consola (CLI) y una gráfica con Pygame (GUI).
 
@@ -210,7 +210,41 @@ Para testear Dice, se usó Mock, dado que no podemos predecir el valor que saldr
 Por otro lado, para testear la interfaz de líneas de comando, se usó @patch. Esta utilidad le da un valor seleccionado por nosotros para asignarle un valor a un input para poder ejecutar el test.
 
 # Referencias a requisitos SOLID y cómo se cumplen
+
+Los principios SOLID fueron implementados en el proyecto usando como guía para el entendimiento de los conceptos y la implementación de los principios, el contenido del siguiente link: https://www.baeldung.com/solid-principles
+
+### SRP: Single Responsibility Principle (Principio de responsabilidad única)
+
+El principio de responsabilidad única establece que una clase debe tener una única responsabilidad (valga la redundancia) y debe tener un único motivo para cambiar.
+En el proyecto, por ejemplo, la clase BackgammonGame delega las responsabilidades de creación de las fichas y de validación de movimientos a las clases CheckerFactory y CheckMoves respectivamente. De esta forma. la clase BackgammonGame únicamente pueede cambiar en el caso de que se quiera hacer algún tipo de "desafío" (como he observado en otros software del juego) que impliquen tener posiciones distintas de las fichas. El resto de las responsabilidades de BackgammonGame tienen que ver con simplemente seguir las reglas y no se pueden cambiar.
+
+### OCP: Open/Closed principle (Abierto para extensión, cerrado para modificación)
+
+Este principio establece que el código debe poder ser extensible, pero no modificable con lo que ya está. A pesar de que en el proyecto no es tan fácil implementar este principio, ya que sabemos que muy probablemente no sea extensible debido a las reglas del juego, intenté implementar un ejemplo en la clase Board.py con los distintos tipos de campos donde las fichas pueden ser colocadas. Primero, se crea una clase Field, la cual actúa de clase padre y de "plantilla" para los otros campos que vayan a ser creados con las clases hijas. A partir de ahí, se crearon las clases PointField como campos para las puntas dentro del tablero, HouseField para el campo donde se pondrán al final las fichas de cada jugador, y EatenField, donde se pondrán las fichas que un oponente le saque del tablero al otro y deba volver a ingresarlas. De esta forma, el código se puede exteneder a más tipos de campos si se quisiera, sin modificar la clase Board.
+
+### LSP: Liskov Substitution Principle (Principio de sustitución de Liskov)
+
+El principio de sustitución de Liskov establece textualmente lo siguiente:
+"Si una clase B es hija de una clase A, entonces deberíamos poder usar B en cualquier lugar donde usamos A, sin que el programa se comporte de manera incorrecta."
+Este principio no fue concretamente implementado en el proyecto dado que las únicas herencias de clases que tenemos es con la clase padre Field, y la clase padre IDice. Se podría decir que este código implícitamente lo cumple, dado que a pesar de que Field es una clase puramente abstracta, sí es cierto que las clases hijas se pueden utilizar en cualquier lugar donde se usa Field sin que el programa se comporte de manera incorrecta, ya que es lo que hacemos: las únicas clases que estén involucradas en una herencia que usamos, son las clases hijas.
+
+### ISP: Interface Segregation Principle (Principio de segeregación de interfaces)
+
+El principio de segregación de interfaces establece que las interfaces que algún usuario no vaya a usar, deben estar separadas y segregadas una de la otra, y únicamente pueden ser accesibles en los casos que para los usuarios sea necesario. En el caso del proyecto, en realidad hay dos tipos de interfaces: la de líneas de comandos y la gráfica. El principio en realidad no refiere tanto a eso, sino, por ejemplo, en un sistema que nada que ver con el proyecto, podría ser la segregación de la página principal de una cuenta de banco (a la que accede el usuario y ve sus tarjetas, movimientos, etc.) y la interfaz que muestra todos los usuarios existentes de ese banco (a las que simplemente podría acceder lo que sería un admoinistrador). A pesar de esto, el principio se implementa implíciitamente ya que los dos posibles tipos de interfaces ya de por sí están segregadas (No es necesario acceder a CLI para acceder a GUI y viceversa), y dentro de cada interfaz no hay interfaces más pequeñas en las que se pueda dividir. Todos los usuarios siempre usarán las mismas interfaces, a menos que el juego sea jugado desde un dispositivo que no soporte interfaces gráficas.
+
+### DIP: Dependency Inversion Principle (Principio de inversión de dependencias)
+
+El principio de inversiones de dependencia establece que debe haber dependencias de abstracciones y no de clases concretas. Se han hecho correcciones en el código para poder implementarlo. En la clase BackgammonGame se han implementado abstracciones de Dice, Player, CheckerFactory y CheckMoves. Este principio funciona ya que las abstracciones simplemente definen un contrato obligatorio, es decir, establecen lo que hay que hacer, pero el modo en el que hay que hacerlo, es delegado a las clases hijas. No se ha cambiado nada en el funcionamiento, sino más bien en la implementación de las clases y en la inversión de las dependencias en el código.
+
 # Anexos: diagramas UML
+
+## Diagrama de clases
+
+![Class Diagram](assets/Clase%20UML.png)
+
+## Diagrama de flujo de validación de movimientos
+
+![Flow Diagram](assets/_Diagrama%20de%20flujo.png)
 
 ---
 
@@ -222,7 +256,7 @@ Some parts we need to take into account regarding this project are_
 - Unittest was used for testing the functionalities in classes and CLI.
 - Coverage for reporting about tests.
 - Pylint for code quality tracking.
-- Github action
+- Github action for continuous integration
 
 To summarize it briefly, there are 4 classes that are "the parts of a table" for the structure of the game: board, checkers, dice and player. Then, there is a class called BackgammonGame that unifies the other 4 classes in order to manage the logic of the game: initialization, turn handling, move validations, moves themselves, and other aspects. This class is the only class that communicates directly with the interfaces, of which there is a command line interface (CLI) and a graphic interface with pygame (GUI).
 
@@ -382,4 +416,36 @@ To test Dice, Mock was used, since we cannot predict the value that will appear 
 On the other hand, to test the command-line interface, @patch was used. This utility allows us to assign a value of our choice to an input in order to execute the test.
 
 # References to SOLID requirements and how they are met
+
+The SOLID principles were implemented in the project using the following resource as a guide for understanding the concepts and implementing the principles: https://www.baeldung.com/solid-principles
+
+### SRP: Single Responsibility Principle
+The Single Responsibility Principle states that a class should have only one responsibility and only one reason to change.
+In the project, for example, the BackgammonGame class delegates the responsibilities of checker creation and move validation to the CheckerFactory and CheckMoves classes respectively. This way, the BackgammonGame class can only change if we want to implement some kind of "challenge" (as I've seen in other backgammon software) that involves having different checker positions. The remaining responsibilities of BackgammonGame are simply about following the game rules and cannot be changed.
+
+### OCP: Open/Closed Principle
+This principle states that code should be open for extension but closed for modification.
+Although it's not easy to implement this principle in the project since the game rules are fixed and not easily extensible, I tried to implement an example in the Board.py class with the different types of fields where checkers can be placed. First, a Field class was created, which acts as a parent class and template for other fields to be created as child classes. From there, PointField classes were created for the points on the board, HouseField for the field where each player's checkers are finally placed, and EatenField for the field where checkers go when an opponent knocks them off the board and they need to re-enter. This way, the code can be extended to more field types if desired, without modifying the Board class.
+
+### LSP: Liskov Substitution Principle
+The Liskov Substitution Principle literally states:
+"If a class B is a child of class A, then we should be able to use B anywhere we use A, without the program behaving incorrectly."
+This principle wasn't explicitly implemented in the project since the only class inheritance we have is with the parent class Field and the parent class IDice. It could be said that this code implicitly complies with it, since although Field is a purely abstract class, it's true that the child classes can be used anywhere Field is used without the program behaving incorrectly, which is exactly what we do - the only inherited classes we use are the child classes.
+
+### ISP: Interface Segregation Principle
+The Interface Segregation Principle states that interfaces that some users won't use should be separated and segregated from each other, and should only be accessible when necessary for users.
+In the case of the project, there are actually two types of interfaces: command-line and graphical. The principle doesn't really refer to that, but rather, for example, in a banking system unrelated to the project, it could mean segregating the main page of a bank account (accessed by the user to see their cards, transactions, etc.) from the interface that shows all existing bank users (which could only be accessed by an administrator). Despite this, the principle is implicitly implemented since the two possible interface types are already segregated by nature (it's not necessary to access CLI to access GUI and vice versa), and within each interface there are no smaller interfaces that could be divided further. All users will always use the same interfaces, unless the game is played on a device that doesn't support graphical interfaces.
+
+### DIP: Dependency Inversion Principle
+The Dependency Inversion Principle states that there should be dependencies on abstractions rather than concrete classes.
+Corrections have been made to the code to implement this. In the BackgammonGame class, abstractions for Dice, Player, CheckerFactory, and CheckMoves have been implemented. This principle works because the abstractions simply define a mandatory contract - they establish what needs to be done, but the way it's done is delegated to the child classes. Nothing has changed in the functionality, but rather in the implementation of the classes and the inversion of dependencies in the code.
+
 # Annexes: UML diagrams
+
+## Class Diagram
+
+![Class Diagram](assets/Clase%20UML.png)
+
+## Flow diagram for move validation
+
+![Flow Diagram](assets/_Diagrama%20de%20flujo.png)

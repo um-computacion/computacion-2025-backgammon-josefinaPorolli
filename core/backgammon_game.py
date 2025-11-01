@@ -1,13 +1,43 @@
 """Module for class Backgammon Game"""
 # This module is destinated to the class that manages the logic of the game.
 from .board import Board
-from .player import Player
-from .dice import Dice
+from .player import Player, IPlayer
+from .dice import Dice, IDice
 from .checker import Checker
 from .exceptions import *
+from typing import List, Optional, Callable
+from abc import ABC, abstractmethod
+
+# Abstraction for CheckMoves
+class IMoveValidator(ABC):
+    @abstractmethod
+    def check_move(self, point: str, steps: int) -> bool:
+        pass
+    
+    @abstractmethod
+    def check_take_out_eaten_checker(self, steps: int) -> bool:
+        pass
+    
+    @abstractmethod
+    def check_opponent_checkers(self, destination: str) -> bool:
+        pass
+    
+    @abstractmethod
+    def check_eatable_checker(self, destination: str) -> bool:
+        pass
+    
+    @abstractmethod
+    def check_move_to_house(self, origin: str, steps: int) -> bool:
+        pass
+
+# Abstraction for CheckerFactory
+class ICheckerFactory(ABC):
+    @abstractmethod
+    def create_checker_set(self, color: str, start_id: int, count: int) -> List:
+        pass
 
 # CLASS FOR CREATING 30 INSTANCES OF CHECKERS
-class CheckerFactory:
+class CheckerFactory(ICheckerFactory):
     @staticmethod # This allows us to use the method w/o creating an instance of the class.
     def create_checker_set(colour, start_id, count):
         """Creates 15 checkers of each colour"""
@@ -16,7 +46,7 @@ class CheckerFactory:
             checkers.append(Checker(start_id + i, colour))
         return checkers
 
-class CheckMoves:
+class CheckMoves(IMoveValidator):
     """Class responsible exclusively for validating moves"""
     
     def __init__(self, board, game):
@@ -337,18 +367,24 @@ class CheckMoves:
 class BackgammonGame:
     """Class with the methods for the logic of the game"""
     # CONSTRUCTOR - sets the main attributes of the class
-    def __init__(self):
+    def __init__(self, 
+                 dice: Optional[IDice] = None,
+                 move_validator: Optional[IMoveValidator] = None,
+                 checker_factory: Optional[ICheckerFactory] = None,
+                 player_factory: Optional[Callable[[str, str], IPlayer]] = None):
         self.__turn__ = None
         self.__board__ = Board()
-        self.__dice1__ = Dice()
-        self.__dice2__ = Dice()
-        self.__player1__ = Player("Player 1", "White")
-        self.__player2__ = Player("Player 2", "Black")
+        self.__dice1__ = dice if dice is not None else Dice()
+        self.__dice2__ = dice if dice is not None else Dice()
+        player_creator = player_factory if player_factory is not None else Player
+        self.__player1__ = player_creator("Player 1", "White")
+        self.__player2__ = player_creator("Player 2", "Black")
         # FIX: instead of making 30 checkers one by one, we use Checker Factory
-        # SRP principle
-        self.__black_checkers__ = CheckerFactory.create_checker_set("Black", 1, 15)
-        self.__white_checkers__ = CheckerFactory.create_checker_set("White", 16, 15)
-        self.__move_validator__ = CheckMoves(self.__board__, self)
+        # SRP and DIP
+        factory = checker_factory if checker_factory is not None else CheckerFactory
+        self.__black_checkers__ = factory.create_checker_set("Black", 1, 15)
+        self.__white_checkers__ = factory.create_checker_set("White", 16, 15)
+        self.__move_validator__ = move_validator if move_validator is not None else CheckMoves(self.__board__, self)
         self.__setup_individual_references__()
 
     def __setup_individual_references__(self):
