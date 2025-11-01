@@ -4,6 +4,7 @@ from .board import Board
 from .player import Player
 from .dice import Dice
 from .checker import Checker
+from .exceptions import *
 
 # CLASS FOR CREATING 30 INSTANCES OF CHECKERS
 class CheckerFactory:
@@ -42,7 +43,7 @@ class CheckMoves:
                 return True
             # If there are no checkers in the mentioned field, there are no eaten checkers.
             return False
-        raise ValueError(f"Could not get a valid colour: {colour}")
+        raise InvalidColourError(colour)
 
     # This method receives the destination point as a parameter.
     # It checks if there are more than 1 opponent checkers in the destination point.
@@ -61,7 +62,7 @@ class CheckMoves:
                 if self.__board__.get_checkers_in_field(destination)[0].get_colour() == "Black":
                     return True
             return False
-        raise ValueError(f"Could not get a valid turn: {turn}")
+        raise InvalidTurnError(turn)
 
     # This method receives the destination point as a parameter.
     # It checks if there is exactly one opponent checker in the destination point.
@@ -81,7 +82,7 @@ class CheckMoves:
                 if self.__board__.get_checkers_in_field(str(destination))[0].get_colour()=="Black":
                     return True
             return False
-        raise ValueError(f"Could not get a valid turn: {turn}")
+        raise InvalidTurnError(turn)
 
     # This method receives destination as a parameter
     # It is a helper method for check_take_out_eaten_checker
@@ -117,7 +118,7 @@ class CheckMoves:
                 # is not blocked by 2 or more black checkers
                 return self._check_take_out_with_opponent_checker(str(25 - steps))
             return False
-        raise ValueError(f"Could not get a valid turn: {turn}")
+        raise InvalidTurnError(turn)
 
     # This method receives the origin and the steps as parameters.
     # It checks if a checker can be moved to the house.
@@ -133,7 +134,7 @@ class CheckMoves:
             return self._check_black_move_to_house(origin, steps)
         if turn == "White":
             return self._check_white_move_to_house(origin, steps)
-        raise ValueError(f"Could not get a valid turn: {turn}")
+        raise InvalidTurnError(turn)
 
     # This method receives the origin point and the steps as parameters.
     # It is a sub method of check_move_to_house for black checkers.
@@ -416,7 +417,7 @@ class BackgammonGame:
             if origin == "WEaten":
                 return str(25 - steps)
             return str(int(origin) - steps)
-        raise ValueError(f"Could not get a valid turn: {self.get_turn()}")
+        raise InvalidTurnError(self.get_turn)
 
     # METHODS FOR THE GAME
 

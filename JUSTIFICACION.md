@@ -179,6 +179,10 @@ La clase debe tener una instancia del juego en general, con la gestión de turno
 - Los múltiples métodos usados para validación de movimientos, no solamente se hicieron de la manera en la que se hicieron para que Pylint estuviera contento, sino que también garantiza un código muchísimo más organizado y mucho más acorde al diagrama de flujo.
 
 # Excepciones y manejo de errores
+
+En el manejo de la lógica del juego en BackgammonGame, se pueden lanzar dos excepciones posibles dentro del archivo exceptions.py. Estas excepciones pueden ser largadas cuando un color no es válido (InvalidColourError) y cuando un turno no es válido (InvalidTurnError).
+Ambas excepciones toman el color o el turno respectivamente, y si no es "Black" o "White", toma cuál es el valor que fue capturado para poder detectar de mejor forma el error y facilitar cualquier debug.
+
 # Estrategias de testing y cobertura
 
 El objetivo de testear el código, es mantener una garantía de que el mismo funciona como se espera. Dichos tesets fueron hechos con Unittest para todos los métodos de todas las clases de core/ y la interfaz de líneas de comando.
@@ -345,6 +349,10 @@ The class must have an instance of the game in general, with the management of t
 - The multiple methods used for move validation were implemented not only to keep Pylint satisfied but also to ensure much more organized code that better follows the flow diagram.
 
 # Exceptions and error handling
+
+In the management of the game logic in BackgammonGame, two possible exceptions can be raised within the exceptions.py file. These exceptions can be thrown when a color is not valid (InvalidColourError) and when a turn is not valid (InvalidTurnError).
+Both exceptions take the color or the turn respectively, and if it is not "Black" or "White", they capture the value that was received to better detect the error and facilitate debugging.
+
 # Testing and coverage strategies
 
 The goal of testing the code is to maintain a guarantee that it functions as expected. These tests were written using Unittest for all methods of all classes in core/ and the command-line interface.
