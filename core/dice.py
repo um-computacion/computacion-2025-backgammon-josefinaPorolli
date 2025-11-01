@@ -3,17 +3,16 @@
 import random
 from abc import ABC, abstractmethod
 
-
 # FOR DIP
 class IDice(ABC):
-    """Abstraction for Dice"""
+    """Abstract class for Dice"""
     @abstractmethod
     def roll(self) -> int:
-        pass
-    
+        """Abstraction for Dice"""
+
     @abstractmethod
     def get_number(self) -> int:
-        pass
+        """Abstract method for get_number"""
 
 class Dice(IDice):
     """Class representing a dice."""

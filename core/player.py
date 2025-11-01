@@ -4,22 +4,22 @@ from abc import ABC, abstractmethod
 
 class IPlayer(ABC):
     """Player abstracion"""
-    
+
     @abstractmethod
     def set_name(self, name: str) -> None:
-        pass
-    
+        """Abstract method for set_name"""
+
     @abstractmethod
     def set_colour(self, colour: str) -> None:
-        pass
-    
+        """Abstract method for set_colour"""
+
     @abstractmethod
     def get_name(self) -> str:
-        pass
-    
+        """Abstract method for get_name"""
+
     @abstractmethod
     def get_colour(self) -> str:
-        pass
+        """Abstract method for get_colour"""
 
 class Player:
     """Class representing a player in the game"""
