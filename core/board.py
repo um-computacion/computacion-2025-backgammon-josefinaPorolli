@@ -18,82 +18,56 @@ class Field(ABC):
     def get_checkers(self) -> List[Any]:
         pass
     
-    # add checkers to the field
-    @abstractmethod
-    def add_checker(self, checker: Any) -> None:
-        pass
+    # # add checkers to the field
+    # @abstractmethod
+    # def add_checker(self, checker: Any) -> None:
+    #     pass
     
-    # remove checkers from field
-    @abstractmethod
-    def remove_checker(self) -> Any:
-        pass
+    # # remove checkers from field
+    # @abstractmethod
+    # def remove_checker(self) -> Any:
+    #     pass
 
 class PointField(Field):
     """Represents normal points"""
     
     def __init__(self, point_number: int):
-        self._name = str(point_number)
-        self._checkers = []
+        self.__name__ = str(point_number)
+        self.__checkers__ = []
     
     def get_name(self) -> str:
-        return self._name
+        return self.__name__
     
     def get_checkers(self) -> List[Any]:
-        return self._checkers.copy()
-    
-    def add_checker(self, checker: Any) -> None:
-        self._checkers.append(checker)
-    
-    def remove_checker(self) -> Any:
-        if not self._checkers:
-            raise IndexError("No checkers to remove")
-        return self._checkers.pop()
+        return self.__checkers__.copy()
 
 class HouseField(Field):
     """Represents House fields"""
     
-    def __init__(self, color: str):
-        self._name = f"{color}House"
-        self._checkers = []
-        self._color = color
+    def __init__(self, colour: str):
+        self.__name__ = f"{colour}House"
+        self.__checkers__ = []
+        self.__color__ = colour
     
     def get_name(self) -> str:
-        return self._name
+        return self.__name__
     
     def get_checkers(self) -> List[Any]:
-        return self._checkers.copy()
-    
-    def add_checker(self, checker: Any) -> None:
-        # Podemos agregar validaciones específicas para la casa
-        self._checkers.append(checker)
-    
-    def remove_checker(self) -> Any:
-        if not self._checkers:
-            raise IndexError("No checkers to remove")
-        return self._checkers.pop()
+        return self.__checkers__.copy()
 
 class EatenField(Field):
     """Represents eaten fields"""
     
-    def __init__(self, color: str):
-        self._name = f"{color}Eaten"
-        self._checkers = []
-        self._color = color
+    def __init__(self, colour: str):
+        self.__name__ = f"{colour}Eaten"
+        self.__checkers__ = []
+        self.__color__ = colour
     
     def get_name(self) -> str:
-        return self._name
+        return self.__name__
     
     def get_checkers(self) -> List[Any]:
-        return self._checkers.copy()
-    
-    def add_checker(self, checker: Any) -> None:
-        self._checkers.append(checker)
-    
-    def remove_checker(self) -> Any:
-        if not self._checkers:
-            raise IndexError("No checkers to remove")
-        return self._checkers.pop()
-
+        return self.__checkers__.copy()
 
 class Board:
     """Class representing the board of the game"""

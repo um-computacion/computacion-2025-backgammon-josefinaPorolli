@@ -1,8 +1,21 @@
 """Module for dice class."""
 
 import random
+from abc import ABC, abstractmethod
 
-class Dice:
+
+# FOR DIP
+class IDice(ABC):
+    """Abstraction for Dice"""
+    @abstractmethod
+    def roll(self) -> int:
+        pass
+    
+    @abstractmethod
+    def get_number(self) -> int:
+        pass
+
+class Dice(IDice):
     """Class representing a dice."""
     # CONSTRUCTOR - sets the attributes of the object.
     def __init__(self):

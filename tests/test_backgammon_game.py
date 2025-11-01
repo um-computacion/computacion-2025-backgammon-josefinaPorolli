@@ -2,6 +2,7 @@
 import unittest
 from unittest.mock import Mock
 from core.backgammon_game import BackgammonGame
+from core.exceptions import *
 
 class TestBackgammonGame(unittest.TestCase):
     """Test for methods in class BackgammonGame"""
@@ -516,38 +517,38 @@ class TestBackgammonGame(unittest.TestCase):
         self.assertEqual(len(self.__game__.__board__.get_checkers_in_field("20")), 13)
     
     def test_get_destination_point_invalid_turn(self):
-        """Test that ValueError is raised when turn is invalid"""
+        """Test that InvalidTurnError is raised when turn is invalid"""
         self.__game__.set_turn("InvalidColor")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidTurnError):
             self.__game__.get_destination_point("1", 1)
 
     def test_check_eaten_checkers_invalid_colour(self):
-        """Test that ValueError is raised when colour is invalid"""
-        with self.assertRaises(ValueError):
+        """Test that InvalidColourError is raised when colour is invalid"""
+        with self.assertRaises(InvalidColourError):
             self.__game__.__move_validator__.check_eaten_checkers("InvalidColor")
 
     def test_check_opponent_checkers_invalid_turn(self):
-        """Test that ValueError is raised when turn is invalid"""
+        """Test that InvalidTurnError is raised when turn is invalid"""
         self.__game__.set_turn("InvalidColor")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidTurnError):
             self.__game__.__move_validator__.check_opponent_checkers("1")
 
     def test_check_eatable_checker_invalid_turn(self):
-        """Test that ValueError is raised when turn is invalid"""
+        """Test that InvalidTurnError is raised when turn is invalid"""
         self.__game__.set_turn("InvalidColor")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidTurnError):
             self.__game__.__move_validator__.check_eatable_checker("1")
 
     def test_check_take_out_eaten_checker_invalid_turn(self):
-        """Test that ValueError is raised when turn is invalid"""
+        """Test that InvalidTurnError is raised when turn is invalid"""
         self.__game__.set_turn("InvalidColor")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidTurnError):
             self.__game__.__move_validator__.check_take_out_eaten_checker(1)
 
     def test_check_move_to_house_invalid_turn(self):
-        """Test that ValueError is raised when turn is invalid"""
+        """Test that InvalidTurnError is raised when turn is invalid"""
         self.__game__.set_turn("InvalidColor")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidTurnError):
             self.__game__.__move_validator__.check_move_to_house("22", 3)
 
     def test_check_move_invalid_turn(self):
