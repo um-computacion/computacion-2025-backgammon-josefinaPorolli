@@ -1,10 +1,14 @@
+"""Module for testing CLI"""
+
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from io import StringIO
 from cli.cli import BackgammonCLI
+from cli.cli import main as cli_main
+from core.checker import Checker
 
 
-class TestBackgammonCLI(unittest.TestCase):
+class TestBackgammonCLI(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Test suite for BackgammonCLI"""
 
     def setUp(self):
@@ -128,7 +132,7 @@ class TestBackgammonCLI(unittest.TestCase):
 
     @patch("builtins.input")
     @patch("sys.stdout", new_callable=StringIO)
-    def test_determine_first_turn_white_wins(self, mock_stdout, mock_input):
+    def test_determine_first_turn_white_wins(self, mock_stdout, _mock_input):
         """It should determine White goes first when White wins el dado."""
         self.cli.game.__player1__.set_name("Alice")
         self.cli.game.__player2__.set_name("Bob")
@@ -218,7 +222,7 @@ class TestBackgammonCLI(unittest.TestCase):
         def flaky_get_board():
             # Raise once, then behave normally
             self.cli.game.__board__.get_board = original_get_board
-            raise Exception("boom")
+            raise RuntimeError("boom")
 
         with patch.object(
             self.cli.game.__board__, "get_board", side_effect=flaky_get_board
@@ -233,9 +237,7 @@ class TestBackgammonCLI(unittest.TestCase):
     def test_main_keyboard_interrupt(self, mock_stdout):
         """It should manejar KeyboardInterrupt en main sin fallar."""
         with patch("cli.cli.BackgammonCLI.play_game", side_effect=KeyboardInterrupt()):
-            from cli.cli import main
-
-            main()
+            cli_main()
         output = mock_stdout.getvalue()
         self.assertIn("Game interrupted", output)
 
@@ -243,9 +245,7 @@ class TestBackgammonCLI(unittest.TestCase):
     def test_main_generic_exception(self, mock_stdout):
         """It should manejar Exception genérica en main y mostrar mensaje."""
         with patch("cli.cli.BackgammonCLI.play_game", side_effect=Exception("x")):
-            from cli.cli import main
-
-            main()
+            cli_main()
         output = mock_stdout.getvalue()
         self.assertIn("An error occurred", output)
 
@@ -253,9 +253,7 @@ class TestBackgammonCLI(unittest.TestCase):
     def test_main_normal(self, mock_stdout):
         """It should ejecutar main normal llamando a play_game."""
         with patch("cli.cli.BackgammonCLI.play_game") as pg:
-            from cli.cli import main
-
-            main()
+            cli_main()
             pg.assert_called_once()
 
     @patch("builtins.input")
@@ -443,8 +441,6 @@ class TestBackgammonCLI(unittest.TestCase):
     def test_display_board_hidden_counters(self, mock_stdout):
         """It should show hidden counters (xN) when >5 fichas en un punto."""
         # Arrange: preparar más de 5 fichas en dos puntos
-        from core.checker import Checker
-
         board = self.cli.game.__board__
         # Top row point 13 (Black) -> trigger hidden on top loop
         for i in range(7):
