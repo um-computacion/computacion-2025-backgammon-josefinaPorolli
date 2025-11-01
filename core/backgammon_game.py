@@ -1,43 +1,50 @@
 """Module for class Backgammon Game"""
 # This module is destinated to the class that manages the logic of the game.
+from typing import List, Optional, Callable
+from abc import ABC, abstractmethod
 from .board import Board
 from .player import Player, IPlayer
 from .dice import Dice, IDice
 from .checker import Checker
-from .exceptions import *
-from typing import List, Optional, Callable
-from abc import ABC, abstractmethod
+from .exceptions import InvalidColourError, InvalidTurnError
 
 # Abstraction for CheckMoves
 class IMoveValidator(ABC):
+    """Abstract class for check_move"""
     @abstractmethod
     def check_move(self, point: str, steps: int) -> bool:
-        pass
-    
+        """Abstract method for check_move"""
+
     @abstractmethod
     def check_take_out_eaten_checker(self, steps: int) -> bool:
-        pass
-    
+        """Abstract method for check_take_out_eaten_checker"""
+
     @abstractmethod
     def check_opponent_checkers(self, destination: str) -> bool:
-        pass
-    
+        """Abstract method for check_opponent_checkers"""
+
     @abstractmethod
     def check_eatable_checker(self, destination: str) -> bool:
-        pass
-    
+        """Abstract method for check_eatable_checker"""
+
     @abstractmethod
     def check_move_to_house(self, origin: str, steps: int) -> bool:
-        pass
+        """Abstract method for check_move_to_house"""
 
 # Abstraction for CheckerFactory
 class ICheckerFactory(ABC):
+    """Abstract class for checker factory"""
     @abstractmethod
-    def create_checker_set(self, color: str, start_id: int, count: int) -> List:
-        pass
+    def create_checker_set(self, colour: str, start_id: int, count: int) -> List:
+        """Abstract method for create_checker_set"""
+
+    @abstractmethod
+    def get_factory_info(self) -> str:
+        """Get information about the factory. I hate pylint."""
 
 # CLASS FOR CREATING 30 INSTANCES OF CHECKERS
 class CheckerFactory(ICheckerFactory):
+    """Abstract class for checker factory"""
     @staticmethod # This allows us to use the method w/o creating an instance of the class.
     def create_checker_set(colour, start_id, count):
         """Creates 15 checkers of each colour"""
@@ -48,7 +55,7 @@ class CheckerFactory(ICheckerFactory):
 
 class CheckMoves(IMoveValidator):
     """Class responsible exclusively for validating moves"""
-    
+
     def __init__(self, board, game):
         self.__board__ = board
         self.__game__ = game
@@ -313,8 +320,7 @@ class CheckMoves(IMoveValidator):
             # If there are eaten checkers, check if this move is to take one out
             if point == "BEaten":
                 return self.check_take_out_eaten_checker(steps)  # Put steps, not colour
-            else:
-                return False  # Cannot move other checkers while having eaten checkers
+            return False  # Cannot move other checkers while having eaten checkers
 
         if int(destination) > 24: # If the checker tries to go off the board
             return self.check_move_to_house(point, steps) # Check if it can enter the house.
@@ -340,8 +346,7 @@ class CheckMoves(IMoveValidator):
             # If there are eaten checkers, check if this move is to take one out
             if point == "WEaten":
                 return self.check_take_out_eaten_checker(steps)  # Put steps, not colour
-            else:
-                return False  # Cannot move other checkers while having eaten checkers
+            return False  # Cannot move other checkers while having eaten checkers
 
         if int(destination) < 1: # If the checker tries to go off the board
             return self.check_move_to_house(point, steps) # Check if it can enter the house.
@@ -367,11 +372,12 @@ class CheckMoves(IMoveValidator):
 class BackgammonGame:
     """Class with the methods for the logic of the game"""
     # CONSTRUCTOR - sets the main attributes of the class
-    def __init__(self, 
+    def __init__(self,
                  dice: Optional[IDice] = None,
                  move_validator: Optional[IMoveValidator] = None,
                  checker_factory: Optional[ICheckerFactory] = None,
                  player_factory: Optional[Callable[[str, str], IPlayer]] = None):
+        # 9 attributes are necessary for the game logic (sorry pylint)
         self.__turn__ = None
         self.__board__ = Board()
         self.__dice1__ = dice if dice is not None else Dice()
@@ -384,7 +390,8 @@ class BackgammonGame:
         factory = checker_factory if checker_factory is not None else CheckerFactory
         self.__black_checkers__ = factory.create_checker_set("Black", 1, 15)
         self.__white_checkers__ = factory.create_checker_set("White", 16, 15)
-        self.__move_validator__ = move_validator if move_validator is not None else CheckMoves(self.__board__, self)
+        self.__move_validator__ = (move_validator if move_validator is not None
+                                   else CheckMoves(self.__board__, self))
         self.__setup_individual_references__()
 
     def __setup_individual_references__(self):
@@ -506,7 +513,7 @@ class BackgammonGame:
         destination = self.get_destination_point(origin, steps)
 
         # Moves from eaten fields
-        if origin == "BEaten" or origin == "WEaten":
+        if origin in ["Beaten", "WEaten"]:
             if self.__move_validator__.check_take_out_eaten_checker(steps):
                 if self.__move_validator__.check_opponent_checkers(destination):
                     if self.__move_validator__.check_eatable_checker(destination):

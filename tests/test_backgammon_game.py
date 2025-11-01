@@ -1,8 +1,13 @@
 """Module for testing the Backgammon Game class"""
+
 import unittest
 from unittest.mock import Mock
 from core.backgammon_game import BackgammonGame
-from core.exceptions import *
+from core.exceptions import InvalidTurnError, InvalidColourError
+
+# I had no idea how to fix this without breaking everything. I did what I could :(
+# pylint: disable=no-member
+# pylint: disable=too-many-public-methods, too-many-statements
 
 class TestBackgammonGame(unittest.TestCase):
     """Test for methods in class BackgammonGame"""
@@ -19,48 +24,48 @@ class TestBackgammonGame(unittest.TestCase):
     def test_set_first_turn_black_wins(self):
         """Test that Black starts when first dice is higher."""
         game = BackgammonGame()
-        
+
         # Mock the dice objects and set specific return values
         game.__dice1__ = Mock()
         game.__dice2__ = Mock()
         game.__dice1__.roll.return_value = 5
         game.__dice2__.roll.return_value = 3
-        
+
         # Call the method under test
         game.set_first_turn()
-        
+
         # Verify the result
         self.assertEqual(game.get_turn(), "Black")
 
     def test_set_first_turn_white_wins(self):
         """Test that White starts when second dice is higher."""
         game = BackgammonGame()
-        
+
         # Mock the dice objects and set specific return values
         game.__dice1__ = Mock()
         game.__dice2__ = Mock()
         game.__dice1__.roll.return_value = 2
         game.__dice2__.roll.return_value = 4
-        
+
         # Call the method under test
         game.set_first_turn()
-        
+
         # Verify the result
         self.assertEqual(game.get_turn(), "White")
 
     def test_set_first_turn_handles_ties(self):
         """Test that ties are handled by re-rolling."""
         game = BackgammonGame()
-        
+
         # Mock the dice objects with side_effect for multiple rolls
         game.__dice1__ = Mock()
         game.__dice2__ = Mock()
         game.__dice1__.roll.side_effect = [3, 3, 6]  # First two ties, then different
         game.__dice2__.roll.side_effect = [3, 3, 2]  # First two ties, then different
-        
+
         # Call the method under test
         game.set_first_turn()
-        
+
         # Verify the result (6 > 2, so Black should win)
         self.assertEqual(game.get_turn(), "Black")
 
@@ -435,22 +440,32 @@ class TestBackgammonGame(unittest.TestCase):
         self.__game__.__board__.add_checker_to_field("2", self.__game__.__b_3__)
         self.__game__.__board__.add_checker_to_field("24", self.__game__.__w_3__)
         # Test that they are in their correct places
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("21"), [self.__game__.__b_1__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("22"), [self.__game__.__b_2__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("5"), [self.__game__.__w_1__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("4"), [self.__game__.__w_2__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("21"), [self.__game__.__b_1__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("22"), [self.__game__.__b_2__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("5"), [self.__game__.__w_1__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("4"), [self.__game__.__w_2__])
         # Set turn to black
         self.__game__.set_turn("Black")
         # Test moving the checkers
         self.__game__.move_checker("22", 1)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__])
         self.__game__.move_checker("21", 2)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__, self.__game__.__b_1__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("23"), [
+                self.__game__.__b_2__, self.__game__.__b_1__])
         # Test moving and eating checkers
         self.__game__.move_checker("23", 1)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__b_1__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_3__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("23"), [self.__game__.__b_2__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__b_1__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_3__])
         # Take out the white checker from the eaten field to keep testing
         self.__game__.__board__.remove_checker_from_field("WEaten")
 
@@ -458,24 +473,34 @@ class TestBackgammonGame(unittest.TestCase):
         self.__game__.set_turn("White")
         # Test moving the checkers
         self.__game__.move_checker("4", 1)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__])
         self.__game__.move_checker("5", 2)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__, self.__game__.__w_1__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("3"), [
+                self.__game__.__w_2__, self.__game__.__w_1__])
         # Test moving and eating checkers
         self.__game__.move_checker("3", 1)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("2"), [self.__game__.__w_1__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("BEaten"), [self.__game__.__b_3__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("3"), [self.__game__.__w_2__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("2"), [self.__game__.__w_1__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("BEaten"), [self.__game__.__b_3__])
         # Take out the black checker from the eaten field to keep testing
         self.__game__.__board__.remove_checker_from_field("BEaten")
         # Test taking out two white checkers from the eaten field.
         # Add a white checkers to the eaten field
         self.__game__.__board__.add_checker_to_field("WEaten", self.__game__.__w_3__)
         self.__game__.__board__.add_checker_to_field("WEaten", self.__game__.__w_4__)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_3__,  self.__game__.__w_4__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("WEaten"), [
+                self.__game__.__w_3__,  self.__game__.__w_4__])
         self.__game__.move_checker("WEaten", 1)
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_3__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__w_4__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("WEaten"), [self.__game__.__w_3__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__w_4__])
         # This ate b_1, so we will remove b_1 from BEaten to keep testing
         self.__game__.__board__.remove_checker_from_field("BEaten")
         # Take out the white checker from the eaten field to keep testing
@@ -484,9 +509,11 @@ class TestBackgammonGame(unittest.TestCase):
         self.__game__.__board__.add_checker_to_field("24", self.__game__.__b_3__)
         self.__game__.move_checker("WEaten", 1)
         self.assertEqual(self.__game__.__board__.get_checkers_in_field("WEaten"), [])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__w_3__])
-        self.assertEqual(self.__game__.__board__.get_checkers_in_field("BEaten"), [self.__game__.__b_3__])
-    
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("24"), [self.__game__.__w_3__])
+        self.assertEqual(
+            self.__game__.__board__.get_checkers_in_field("BEaten"), [self.__game__.__b_3__])
+
     def test_move_checker_to_house(self):
         """Method for testing moving checkers to the house"""
         # Add all black checkers to the black square
@@ -515,7 +542,7 @@ class TestBackgammonGame(unittest.TestCase):
         self.__game__.move_checker("20", 5)
         self.assertEqual(len(self.__game__.__board__.get_checkers_in_field("BHouse")), 2)
         self.assertEqual(len(self.__game__.__board__.get_checkers_in_field("20")), 13)
-    
+
     def test_get_destination_point_invalid_turn(self):
         """Test that InvalidTurnError is raised when turn is invalid"""
         self.__game__.set_turn("InvalidColor")
